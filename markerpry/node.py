@@ -8,6 +8,7 @@ import re
 
 
 Environment = dict[str, list[str | Version | re.Pattern[str] | bool]]
+Comparator = Literal["==", "!=", ">", "<", ">=", "<="]
 
 
 class Node(ABC):
@@ -75,7 +76,7 @@ class ExpressionNode(Node):
     """A node representing a comparison expression (e.g., python_version > '3.7')."""
 
     lhs: str
-    comparator: Literal["==", "!=", ">", "<", ">=", "<="]
+    comparator: Comparator
     rhs: str
 
     @override

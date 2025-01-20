@@ -46,14 +46,15 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types]
 dependencies = [
   "mypy>=1.0.0",
+  "pytest-mypy-plugins>=3.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:markerpry tests}"
+check = "mypy --install-types --non-interactive --check-untyped-defs {args:markerpry tests}"
 
 [tool.coverage.run]
 source_pkgs = ["markerpry", "tests"]
