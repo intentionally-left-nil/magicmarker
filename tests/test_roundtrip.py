@@ -1,7 +1,7 @@
 import pytest
 
-from magic_marker.node import BooleanNode
-from magic_marker.parser import parse
+from markerpry.node import BooleanNode
+from markerpry.parser import parse
 from packaging.markers import Marker
 
 
@@ -124,4 +124,6 @@ def test_simplify():
     marker_str = '(implementation_name == "cpython" and python_version >= "3.8") or os_name == "posix"'
     node = parse(marker_str)
     simplified = node.evaluate({"implementation_name": ["pypy"]})
-    assert str(Marker(str(simplified))).replace('"', "'") == 'os_name == "posix"'.replace('"', "'")
+    assert str(Marker(str(simplified))).replace(
+        '"', "'"
+    ) == 'os_name == "posix"'.replace('"', "'")

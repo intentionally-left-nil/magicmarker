@@ -2,14 +2,14 @@ from packaging.version import Version
 import pytest
 import re
 
-from magic_marker.node import (
+from markerpry.node import (
     ExpressionNode,
     BooleanNode,
     Node,
     OperatorNode,
     Environment,
 )
-from magic_marker.parser import parse
+from markerpry.parser import parse
 
 
 # Basic string comparison tests

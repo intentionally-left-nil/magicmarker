@@ -1,6 +1,6 @@
 import pytest
-from magic_marker.parser import parse
-from magic_marker.node import Node, ExpressionNode, OperatorNode, BooleanNode
+from markerpry.parser import parse
+from markerpry.node import Node, ExpressionNode, OperatorNode, BooleanNode
 from packaging.markers import Marker
 
 

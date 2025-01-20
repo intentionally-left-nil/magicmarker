@@ -1,7 +1,7 @@
-# Magic Marker
+# Markerpry
 
-[![PyPI - Version](https://img.shields.io/pypi/v/magic-marker.svg)](https://pypi.org/project/magic-marker)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/magic-marker.svg)](https://pypi.org/project/magic-marker)
+[![PyPI - Version](https://img.shields.io/pypi/v/markerpry.svg)](https://pypi.org/project/markerpry)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/markerpry.svg)](https://pypi.org/project/markerpry)
 
 ---
 
@@ -18,19 +18,19 @@
 ## Installation
 
 ```console
-pip install magic-marker
+pip install markerpry
 ```
 
 ## Usage
 
-Magic Marker provides a powerful way to parse, manipulate and evaluate Python package environment markers.
+Markerpry provides a powerful way to parse, manipulate and evaluate Python package environment markers.
 
 ### Parsing Markers
 
 Use the `parse()` method to create a tree structure from a marker string:
 
 ```python
-from magic_marker import parse
+from markerpry import parse
 
 # Parse a marker expression into a tree
 tree = parse('python_version >= "3.7" and (os_name == "posix" or platform_system == "Linux")')
@@ -156,4 +156,4 @@ If any parts of the expression can't be evaluated (due to missing environment va
 
 ## License
 
-`magic-marker` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`markerpry` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

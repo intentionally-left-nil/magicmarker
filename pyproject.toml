@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "magic_marker"
+name = "markerpry"
 version = "0.1.0"
 description = "A library for parsing and transforming Python packaging markers"
 requires-python = ">=3.7"
@@ -21,12 +21,12 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/magic-marker#readme"
-Issues = "https://github.com/unknown/magic-marker/issues"
-Source = "https://github.com/unknown/magic-marker"
+Documentation = "https://github.com/intentionally-left-nil/markerpry#readme"
+Issues = "https://github.com/intentionally-left-nil/markerpry#readme"
+Source = "https://github.com/intentionally-left-nil/markerpry#readme"
 
 [tool.hatch.version]
-path = "magic_marker/__about__.py"
+path = "markerpry/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -53,19 +53,19 @@ dependencies = [
   "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:magic_marker tests}"
+check = "mypy --install-types --non-interactive {args:markerpry tests}"
 
 [tool.coverage.run]
-source_pkgs = ["magic_marker", "tests"]
+source_pkgs = ["markerpry", "tests"]
 branch = true
 parallel = true
 omit = [
-  "magic_marker/__about__.py",
+  "markerpry/__about__.py",
 ]
 
 [tool.coverage.paths]
-magic_marker = ["magic_marker", "*/magic-marker/magic_marker"]
-tests = ["tests", "*/magic-marker/tests"]
+markerpry = ["markerpry", "*/markerpry/markerpry"]
+tests = ["tests", "*/markerpry/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
