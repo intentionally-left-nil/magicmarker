@@ -17,16 +17,12 @@ basic_markers = [
     ),
     (
         "platform_python_implementation == 'CPython'",
-        ExpressionNode(
-            lhs="platform_python_implementation", comparator="==", rhs="CPython"
-        ),
+        ExpressionNode(lhs="platform_python_implementation", comparator="==", rhs="CPython"),
     ),
 ]
 
 
-@pytest.mark.parametrize(
-    "marker_str,expected", basic_markers, ids=[x[0] for x in basic_markers]
-)
+@pytest.mark.parametrize("marker_str,expected", basic_markers, ids=[x[0] for x in basic_markers])
 def test_basic_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert result == expected
@@ -49,9 +45,7 @@ version_markers = [
 ]
 
 
-@pytest.mark.parametrize(
-    "marker_str,expected", version_markers, ids=[x[0] for x in version_markers]
-)
+@pytest.mark.parametrize("marker_str,expected", version_markers, ids=[x[0] for x in version_markers])
 def test_version_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert result == expected
@@ -78,9 +72,7 @@ boolean_markers = [
 ]
 
 
-@pytest.mark.parametrize(
-    "marker_str,expected", boolean_markers, ids=[x[0] for x in boolean_markers]
-)
+@pytest.mark.parametrize("marker_str,expected", boolean_markers, ids=[x[0] for x in boolean_markers])
 def test_boolean_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert result == expected
@@ -96,9 +88,7 @@ nested_and_markers = [
             _right=OperatorNode(
                 operator="and",
                 _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
-                _right=ExpressionNode(
-                    lhs="platform_machine", comparator="==", rhs="x86_64"
-                ),
+                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
             ),
         ),
     ),
@@ -111,17 +101,13 @@ nested_and_markers = [
                 _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
                 _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
             ),
-            _right=ExpressionNode(
-                lhs="platform_machine", comparator="==", rhs="x86_64"
-            ),
+            _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
         ),
     ),
 ]
 
 
-@pytest.mark.parametrize(
-    "marker_str,expected", nested_and_markers, ids=[x[0] for x in nested_and_markers]
-)
+@pytest.mark.parametrize("marker_str,expected", nested_and_markers, ids=[x[0] for x in nested_and_markers])
 def test_nested_and_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert result == expected
@@ -140,9 +126,7 @@ complex_and_markers = [
                 _left=OperatorNode(
                     operator="and",
                     _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
-                    _right=ExpressionNode(
-                        lhs="platform_machine", comparator="==", rhs="x86_64"
-                    ),
+                    _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
                 ),
             ),
         ),
@@ -158,9 +142,7 @@ complex_and_markers = [
             ),
             _right=OperatorNode(
                 operator="and",
-                _left=ExpressionNode(
-                    lhs="platform_machine", comparator="==", rhs="x86_64"
-                ),
+                _left=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
                 _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
             ),
         ),
@@ -168,9 +150,7 @@ complex_and_markers = [
 ]
 
 
-@pytest.mark.parametrize(
-    "marker_str,expected", complex_and_markers, ids=[x[0] for x in complex_and_markers]
-)
+@pytest.mark.parametrize("marker_str,expected", complex_and_markers, ids=[x[0] for x in complex_and_markers])
 def test_complex_and_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert result == expected
@@ -213,9 +193,7 @@ mixed_op_markers = [
             _right=OperatorNode(
                 operator="and",
                 _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(
-                    lhs="platform_machine", comparator="==", rhs="x86_64"
-                ),
+                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
             ),
         ),
     ),
@@ -228,9 +206,7 @@ mixed_op_markers = [
                 _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
                 _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
             ),
-            _right=ExpressionNode(
-                lhs="platform_machine", comparator="==", rhs="x86_64"
-            ),
+            _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
         ),
     ),
     (
@@ -241,9 +217,7 @@ mixed_op_markers = [
             _right=OperatorNode(
                 operator="or",
                 _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(
-                    lhs="platform_machine", comparator="==", rhs="x86_64"
-                ),
+                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
             ),
         ),
     ),
@@ -255,18 +229,14 @@ mixed_op_markers = [
             _right=OperatorNode(
                 operator="or",
                 _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(
-                    lhs="platform_machine", comparator="==", rhs="x86_64"
-                ),
+                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
             ),
         ),
     ),
 ]
 
 
-@pytest.mark.parametrize(
-    "marker_str,expected", mixed_op_markers, ids=[x[0] for x in mixed_op_markers]
-)
+@pytest.mark.parametrize("marker_str,expected", mixed_op_markers, ids=[x[0] for x in mixed_op_markers])
 def test_mixed_op_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert result == expected
