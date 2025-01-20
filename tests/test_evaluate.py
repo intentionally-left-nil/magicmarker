@@ -241,6 +241,74 @@ def test_regex_evaluate(
     assert result == expected
 
 
+# Boolean literal tests
+boolean_literal_testdata = [
+    (
+        "boolean_literal_true",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": [True]},
+        BooleanNode(True),
+    ),
+    (
+        "boolean_literal_false",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": [False]},
+        BooleanNode(False),
+    ),
+    (
+        "boolean_true_with_other_values",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": ["PyPy", True, "CPython"]},
+        BooleanNode(True),
+    ),
+    (
+        "boolean_false_with_other_values",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": ["CPython", False, "CPython"]},
+        BooleanNode(False),
+    ),
+    (
+        "boolean_in_and_operator",
+        OperatorNode(
+            operator="and",
+            _left=ExpressionNode("python_implementation", "==", "CPython"),
+            _right=ExpressionNode("python_version", ">=", "3.7"),
+        ),
+        {
+            "python_implementation": [True],
+            "python_version": [Version("3.8")],
+        },
+        BooleanNode(True),
+    ),
+    (
+        "boolean_in_or_operator",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode("python_implementation", "==", "CPython"),
+            _right=ExpressionNode("python_version", ">=", "3.7"),
+        ),
+        {
+            "python_implementation": [False],
+            "python_version": [Version("3.6")],
+        },
+        BooleanNode(False),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,expr,env,expected",
+    boolean_literal_testdata,
+    ids=[x[0] for x in boolean_literal_testdata],
+)
+def test_boolean_literal_evaluate(
+    name: str, expr: Node, env: Environment, expected: Node
+):
+    """Test evaluation of boolean literals in various contexts."""
+    result = expr.evaluate(env)
+    assert result == expected
+
+
 operator_testdata = [
     # AND operations with partial evaluation
     (

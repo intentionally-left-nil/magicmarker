@@ -7,14 +7,11 @@ from packaging.specifiers import SpecifierSet, InvalidSpecifier
 import re
 
 
-Environment = dict[str, list[str | Version | re.Pattern[str]]]
+Environment = dict[str, list[str | Version | re.Pattern[str] | bool]]
 
 
 class Node(ABC):
     """Base class for all nodes in the marker expression tree."""
-
-    left: "Node | None" = None
-    right: "Node | None" = None
 
     @abstractmethod
     def value(self) -> str:
@@ -26,13 +23,31 @@ class Node(ABC):
         """Partially or fully evaluates the node based on the environment"""
         pass
 
+    @override
     @abstractmethod
     def __str__(self) -> str:
         """Return a string representation of this node."""
         pass
 
+    @property
+    def left(self) -> "Node | None":
+        return None
 
-@dataclass
+    @property
+    def right(self) -> "Node | None":
+        return None
+
+    def contains(self, key: str) -> bool:
+        if self.left is not None:
+            if self.left.contains(key):
+                return True
+        if self.right is not None:
+            if self.right.contains(key):
+                return True
+        return False
+
+
+@dataclass(frozen=True)
 class BooleanNode(Node):
     """A node representing a boolean literal value."""
 
@@ -43,21 +58,19 @@ class BooleanNode(Node):
         return str(self.state)
 
     @override
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, BooleanNode):
-            return NotImplemented
-        return self.state == other.state
-
-    @override
     def __str__(self) -> str:
         return str(self.state)
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
-        return BooleanNode(self.state)
+        return self  # No need to create new BooleanNode since they're immutable
 
 
-@dataclass
+TRUE = BooleanNode(True)
+FALSE = BooleanNode(False)
+
+
+@dataclass(frozen=True)
 class ExpressionNode(Node):
     """A node representing a comparison expression (e.g., python_version > '3.7')."""
 
@@ -70,23 +83,17 @@ class ExpressionNode(Node):
         return f"{self.lhs} {self.comparator} {self.rhs}"
 
     @override
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, ExpressionNode):
-            return NotImplemented
-        return (
-            self.lhs == other.lhs
-            and self.comparator == other.comparator
-            and self.rhs == other.rhs
-        )
-
-    @override
     def __str__(self) -> str:
         return f'{self.lhs} {self.comparator} "{self.rhs}"'
 
     @override
+    def contains(self, key: str) -> bool:
+        return self.lhs == key
+
+    @override
     def evaluate(self, environment: Environment) -> "Node":
         if not self.lhs in environment:
-            return self.copy()
+            return self
         values = environment[self.lhs]
         result: bool | None = None
         for value in values:
@@ -99,9 +106,12 @@ class ExpressionNode(Node):
             elif isinstance(value, Version):
                 eval = self._evaluate_version(value)
                 result = result if eval is None else result or eval
+            elif isinstance(value, bool):
+                result = value
+                break
             else:
                 assert_never(value)
-        return self.copy() if result is None else BooleanNode(result)
+        return self if result is None else BooleanNode(result)
 
     def _evaluate_string(self, value: str) -> "bool | None":
         if self.comparator == "==":
@@ -126,37 +136,28 @@ class ExpressionNode(Node):
             return None
         return specifier.contains(value)
 
-    def copy(self) -> "ExpressionNode":
-        return ExpressionNode(self.lhs, self.comparator, self.rhs)
 
-
-@dataclass
+@dataclass(frozen=True)
 class OperatorNode(Node):
     """A node representing a boolean operation (and/or) between two child nodes."""
 
     operator: Literal["and", "or"]
     _left: Node
     _right: Node
-    left: "Node | None" = None
-    right: "Node | None" = None
 
-    def __post_init__(self):
-        self.left = self._left
-        self.right = self._right
+    @property
+    @override
+    def left(self) -> "Node | None":
+        return self._left
+
+    @property
+    @override
+    def right(self) -> "Node | None":
+        return self._right
 
     @override
     def value(self) -> str:
         return f"{self._left.value()} {self.operator} {self._right.value()}"
-
-    @override
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, OperatorNode):
-            return NotImplemented
-        return (
-            self.operator == other.operator
-            and self._left == other._left
-            and self._right == other._right
-        )
 
     @override
     def __str__(self) -> str:
@@ -167,17 +168,21 @@ class OperatorNode(Node):
         left = self._left.evaluate(environment)
         right = self._right.evaluate(environment)
 
+        # If neither child changed, return self
+        if left is self._left and right is self._right:
+            return self
+
         if self.operator == "or":
             if isinstance(left, BooleanNode):
-                return BooleanNode(True) if left.state else right
+                return TRUE if left.state else right
             if isinstance(right, BooleanNode):
-                return BooleanNode(True) if right.state else left
+                return TRUE if right.state else left
             return OperatorNode(self.operator, left, right)
         elif self.operator == "and":
             if isinstance(left, BooleanNode):
-                return right if left.state else BooleanNode(False)
+                return right if left.state else FALSE
             if isinstance(right, BooleanNode):
-                return left if right.state else BooleanNode(False)
+                return left if right.state else FALSE
             return OperatorNode(self.operator, left, right)
         else:
             assert_never(self.operator)
