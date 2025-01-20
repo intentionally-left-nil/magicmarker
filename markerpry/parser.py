@@ -1,8 +1,9 @@
-from typing import Any
-from packaging.markers import Marker
-from packaging._parser import Op, Variable, Value
+from typing import Any, cast
 
-from .node import Node, OperatorNode, ExpressionNode
+from packaging._parser import Op, Value, Variable
+from packaging.markers import Marker
+
+from markerpry.node import Comparator, ExpressionNode, Node, OperatorNode
 
 
 def parse(marker_str: str) -> Node:
@@ -46,7 +47,7 @@ def _parse_marker(marker: Any) -> Node:
             ):
                 return ExpressionNode(
                     lhs=lhs.value,
-                    comparator=comparator.value,
+                    comparator=cast(Comparator, comparator.value),
                     rhs=rhs.value,
                 )
         if len(marker) >= 3 and (marker[1] == "and" or marker[1] == "or"):

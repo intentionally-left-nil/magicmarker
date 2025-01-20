@@ -1,16 +1,10 @@
-from packaging.version import Version
-import pytest
 import re
 
-from markerpry.node import (
-    ExpressionNode,
-    BooleanNode,
-    Node,
-    OperatorNode,
-    Environment,
-)
-from markerpry.parser import parse
+import pytest
+from packaging.version import Version
 
+from markerpry.node import BooleanNode, Environment, ExpressionNode, Node, OperatorNode
+from markerpry.parser import parse
 
 # Basic string comparison tests
 string_testdata = [
@@ -52,9 +46,7 @@ string_testdata = [
     string_testdata,
     ids=[x[0] for x in string_testdata],
 )
-def test_string_evaluate(
-    name: str, expr: ExpressionNode, env: Environment, expected: Node
-):
+def test_string_evaluate(name: str, expr: ExpressionNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -99,9 +91,7 @@ version_testdata = [
     version_testdata,
     ids=[x[0] for x in version_testdata],
 )
-def test_version_evaluate(
-    name: str, expr: ExpressionNode, env: Environment, expected: Node
-):
+def test_version_evaluate(name: str, expr: ExpressionNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -128,9 +118,7 @@ multiple_value_testdata = [
     multiple_value_testdata,
     ids=[x[0] for x in multiple_value_testdata],
 )
-def test_multiple_values_evaluate(
-    name: str, expr: ExpressionNode, env: Environment, expected: Node
-):
+def test_multiple_values_evaluate(name: str, expr: ExpressionNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -163,9 +151,7 @@ missing_env_testdata = [
     missing_env_testdata,
     ids=[x[0] for x in missing_env_testdata],
 )
-def test_missing_env_evaluate(
-    name: str, expr: ExpressionNode, env: Environment, expected: Node
-):
+def test_missing_env_evaluate(name: str, expr: ExpressionNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -234,9 +220,73 @@ regex_testdata = [
     regex_testdata,
     ids=[x[0] for x in regex_testdata],
 )
-def test_regex_evaluate(
-    name: str, expr: ExpressionNode, env: Environment, expected: Node
-):
+def test_regex_evaluate(name: str, expr: ExpressionNode, env: Environment, expected: Node):
+    result = expr.evaluate(env)
+    assert result == expected
+
+
+# Boolean literal tests
+boolean_literal_testdata = [
+    (
+        "boolean_literal_true",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": [True]},
+        BooleanNode(True),
+    ),
+    (
+        "boolean_literal_false",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": [False]},
+        BooleanNode(False),
+    ),
+    (
+        "boolean_true_with_other_values",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": ["PyPy", True, "CPython"]},
+        BooleanNode(True),
+    ),
+    (
+        "boolean_false_with_other_values",
+        ExpressionNode("python_implementation", "==", "CPython"),
+        {"python_implementation": ["CPython", False, "CPython"]},
+        BooleanNode(False),
+    ),
+    (
+        "boolean_in_and_operator",
+        OperatorNode(
+            operator="and",
+            _left=ExpressionNode("python_implementation", "==", "CPython"),
+            _right=ExpressionNode("python_version", ">=", "3.7"),
+        ),
+        {
+            "python_implementation": [True],
+            "python_version": [Version("3.8")],
+        },
+        BooleanNode(True),
+    ),
+    (
+        "boolean_in_or_operator",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode("python_implementation", "==", "CPython"),
+            _right=ExpressionNode("python_version", ">=", "3.7"),
+        ),
+        {
+            "python_implementation": [False],
+            "python_version": [Version("3.6")],
+        },
+        BooleanNode(False),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,expr,env,expected",
+    boolean_literal_testdata,
+    ids=[x[0] for x in boolean_literal_testdata],
+)
+def test_boolean_literal_evaluate(name: str, expr: Node, env: Environment, expected: Node):
+    """Test evaluation of boolean literals in various contexts."""
     result = expr.evaluate(env)
     assert result == expected
 
@@ -251,9 +301,7 @@ operator_testdata = [
             _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
         ),
         {"os_name": ["posix"]},  # right evaluates to True
-        ExpressionNode(
-            lhs="missing_key", comparator="==", rhs="value"
-        ),  # Returns left expression
+        ExpressionNode(lhs="missing_key", comparator="==", rhs="value"),  # Returns left expression
     ),
     (
         "and_left_true_right_unknown",
@@ -263,9 +311,7 @@ operator_testdata = [
             _right=ExpressionNode(lhs="missing_key", comparator="==", rhs="value"),
         ),
         {"os_name": ["posix"]},  # left evaluates to True
-        ExpressionNode(
-            lhs="missing_key", comparator="==", rhs="value"
-        ),  # Returns right expression
+        ExpressionNode(lhs="missing_key", comparator="==", rhs="value"),  # Returns right expression
     ),
     (
         "and_left_false_shortcircuit",
@@ -286,9 +332,7 @@ operator_testdata = [
             _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
         ),
         {"os_name": ["nt"]},  # right evaluates to False
-        ExpressionNode(
-            lhs="missing_key", comparator="==", rhs="value"
-        ),  # Returns left expression
+        ExpressionNode(lhs="missing_key", comparator="==", rhs="value"),  # Returns left expression
     ),
     (
         "or_left_false_right_unknown",
@@ -298,9 +342,7 @@ operator_testdata = [
             _right=ExpressionNode(lhs="missing_key", comparator="==", rhs="value"),
         ),
         {"os_name": ["nt"]},  # left evaluates to False
-        ExpressionNode(
-            lhs="missing_key", comparator="==", rhs="value"
-        ),  # Returns right expression
+        ExpressionNode(lhs="missing_key", comparator="==", rhs="value"),  # Returns right expression
     ),
     (
         "or_left_true_shortcircuit",
@@ -335,9 +377,7 @@ operator_testdata = [
     operator_testdata,
     ids=[x[0] for x in operator_testdata],
 )
-def test_operator_evaluate(
-    name: str, expr: OperatorNode, env: Environment, expected: Node
-):
+def test_operator_evaluate(name: str, expr: OperatorNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -399,9 +439,7 @@ or_shortcircuit_testdata = [
     or_shortcircuit_testdata,
     ids=[x[0] for x in or_shortcircuit_testdata],
 )
-def test_or_shortcircuit_evaluate(
-    name: str, expr: OperatorNode, env: Environment, expected: Node
-):
+def test_or_shortcircuit_evaluate(name: str, expr: OperatorNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -469,9 +507,7 @@ partial_eval_testdata = [
     partial_eval_testdata,
     ids=[x[0] for x in partial_eval_testdata],
 )
-def test_partial_evaluation(
-    name: str, expr: OperatorNode, env: Environment, expected: Node
-):
+def test_partial_evaluation(name: str, expr: OperatorNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
 
@@ -516,8 +552,6 @@ full_eval_testdata = [
     full_eval_testdata,
     ids=[x[0] for x in full_eval_testdata],
 )
-def test_full_evaluation(
-    name: str, expr: OperatorNode, env: Environment, expected: Node
-):
+def test_full_evaluation(name: str, expr: OperatorNode, env: Environment, expected: Node):
     result = expr.evaluate(env)
     assert result == expected
