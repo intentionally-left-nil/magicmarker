@@ -3,8 +3,7 @@ import re
 import pytest
 from packaging.version import Version
 
-from markerpry.node import (BooleanNode, Environment, ExpressionNode, Node,
-                            OperatorNode)
+from markerpry.node import BooleanNode, Environment, ExpressionNode, Node, OperatorNode
 from markerpry.parser import parse
 
 # Basic string comparison tests

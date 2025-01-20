@@ -15,11 +15,6 @@ class Node(ABC):
     """Base class for all nodes in the marker expression tree."""
 
     @abstractmethod
-    def value(self) -> str:
-        """Return a string representation of this node's value."""
-        pass
-
-    @abstractmethod
     def evaluate(self, environment: Environment) -> "Node":
         """Partially or fully evaluates the node based on the environment"""
         pass
@@ -55,10 +50,6 @@ class BooleanNode(Node):
     state: bool
 
     @override
-    def value(self) -> str:
-        return str(self.state)
-
-    @override
     def __str__(self) -> str:
         return str(self.state)
 
@@ -78,10 +69,6 @@ class ExpressionNode(Node):
     lhs: str
     comparator: Comparator
     rhs: str
-
-    @override
-    def value(self) -> str:
-        return f"{self.lhs} {self.comparator} {self.rhs}"
 
     @override
     def __str__(self) -> str:
@@ -155,10 +142,6 @@ class OperatorNode(Node):
     @override
     def right(self) -> "Node | None":
         return self._right
-
-    @override
-    def value(self) -> str:
-        return f"{self._left.value()} {self.operator} {self._right.value()}"
 
     @override
     def __str__(self) -> str:

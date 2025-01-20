@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "pytest-cov>=4.1.0",
 ]
 
 [project.urls]
@@ -32,6 +33,7 @@ path = "markerpry/__about__.py"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "pytest-cov>=4.1.0",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -56,12 +58,12 @@ dependencies = [
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:markerpry tests}"
 style = [
-  "black --check --diff {args:.}",
   "isort --check --diff {args:.}",
+  "black --check --diff {args:.}",
 ]
-fmt = [
-  "black {args:.}",
+fix = [
   "isort {args:.}",
+  "black {args:.}",
 ]
 all = [
   "style",
@@ -87,6 +89,9 @@ omit = [
   "markerpry/__about__.py",
 ]
 
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=xml --cov-report=html --cov-config=.coveragerc"
+
 [tool.coverage.paths]
 markerpry = ["markerpry", "*/markerpry/markerpry"]
 tests = ["tests", "*/markerpry/tests"]
@@ -97,3 +102,12 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.black]
+target-version = ["py310"]
+line-length = 120
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+skip_glob = ["env/*"]
