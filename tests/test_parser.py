@@ -1,29 +1,7 @@
 import pytest
 from magic_marker.parser import parse
 from magic_marker.node import Node, ExpressionNode, OperatorNode, BooleanNode
-
-
-def assert_nodes_equal(left: Node, right: Node) -> None:
-    """Assert that two marker nodes are structurally equivalent."""
-    assert type(left) == type(
-        right
-    ), f"Node types differ: {type(left)} != {type(right)}"
-
-    if isinstance(left, BooleanNode) and isinstance(right, BooleanNode):
-        assert left.state == right.state
-
-    elif isinstance(left, ExpressionNode) and isinstance(right, ExpressionNode):
-        assert left.lhs == right.lhs, "LHS differs"
-        assert left.comparator == right.comparator, "Comparator differs"
-        assert left.rhs == right.rhs, "RHS differs"
-
-    elif isinstance(left, OperatorNode) and isinstance(right, OperatorNode):
-        assert left.operator == right.operator, "Operator differs"
-        assert_nodes_equal(left._left, right._left)
-        assert_nodes_equal(left._right, right._right)
-
-    else:
-        pytest.fail(f"Unknown node type comparison: {type(left)} vs {type(right)}")
+from packaging.markers import Marker
 
 
 # Basic comparison tests
@@ -51,7 +29,7 @@ basic_markers = [
 )
 def test_basic_markers(marker_str: str, expected):
     result = parse(marker_str)
-    assert_nodes_equal(result, expected)
+    assert result == expected
 
 
 # Version comparison tests
@@ -76,7 +54,7 @@ version_markers = [
 )
 def test_version_markers(marker_str: str, expected):
     result = parse(marker_str)
-    assert_nodes_equal(result, expected)
+    assert result == expected
 
 
 # Simple boolean operation tests
@@ -105,7 +83,7 @@ boolean_markers = [
 )
 def test_boolean_markers(marker_str: str, expected):
     result = parse(marker_str)
-    assert_nodes_equal(result, expected)
+    assert result == expected
 
 
 # Nested AND operation tests
@@ -146,7 +124,7 @@ nested_and_markers = [
 )
 def test_nested_and_markers(marker_str: str, expected):
     result = parse(marker_str)
-    assert_nodes_equal(result, expected)
+    assert result == expected
 
 
 # Complex nested AND operation tests
@@ -195,7 +173,7 @@ complex_and_markers = [
 )
 def test_complex_and_markers(marker_str: str, expected):
     result = parse(marker_str)
-    assert_nodes_equal(result, expected)
+    assert result == expected
 
 
 # Invalid marker tests
@@ -291,4 +269,4 @@ mixed_op_markers = [
 )
 def test_mixed_op_markers(marker_str: str, expected):
     result = parse(marker_str)
-    assert_nodes_equal(result, expected)
+    assert result == expected
