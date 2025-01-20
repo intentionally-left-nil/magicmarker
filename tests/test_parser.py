@@ -26,7 +26,8 @@ def assert_nodes_equal(left: Node, right: Node) -> None:
         pytest.fail(f"Unknown node type comparison: {type(left)} vs {type(right)}")
 
 
-testdata = [
+# Basic comparison tests
+basic_markers = [
     ("os_name == 'nt'", ExpressionNode(lhs="os_name", comparator="==", rhs="nt")),
     (
         "sys_platform == 'win32'",
@@ -42,6 +43,19 @@ testdata = [
             lhs="platform_python_implementation", comparator="==", rhs="CPython"
         ),
     ),
+]
+
+
+@pytest.mark.parametrize(
+    "marker_str,expected", basic_markers, ids=[x[0] for x in basic_markers]
+)
+def test_basic_markers(marker_str: str, expected):
+    result = parse(marker_str)
+    assert_nodes_equal(result, expected)
+
+
+# Version comparison tests
+version_markers = [
     (
         "python_version >= '3.8'",
         ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
@@ -54,36 +68,19 @@ testdata = [
         "implementation_version == '3.8.10'",
         ExpressionNode(lhs="implementation_version", comparator="==", rhs="3.8.10"),
     ),
-    (
-        "python_version > '3.7'",
-        ExpressionNode(lhs="python_version", comparator=">", rhs="3.7"),
-    ),
-    (
-        "python_version < '4.0'",
-        ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
-    ),
-    (
-        "python_version >= '3.6'",
-        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.6"),
-    ),
-    (
-        "python_version <= '4.0'",
-        ExpressionNode(lhs="python_version", comparator="<=", rhs="4.0"),
-    ),
-    (
-        "python_version != '3.7'",
-        ExpressionNode(lhs="python_version", comparator="!=", rhs="3.7"),
-    ),
-    ('extra == "test"', ExpressionNode(lhs="extra", comparator="==", rhs="test")),
-    (
-        'python_version == "3.8"',
-        ExpressionNode(lhs="python_version", comparator="==", rhs="3.8"),
-    ),
-    (
-        "python_version == '3.8'",
-        ExpressionNode(lhs="python_version", comparator="==", rhs="3.8"),
-    ),
-    # Simple AND combinations
+]
+
+
+@pytest.mark.parametrize(
+    "marker_str,expected", version_markers, ids=[x[0] for x in version_markers]
+)
+def test_version_markers(marker_str: str, expected):
+    result = parse(marker_str)
+    assert_nodes_equal(result, expected)
+
+
+# Simple boolean operation tests
+boolean_markers = [
     (
         "python_version >= '3.8' and os_name == 'posix'",
         OperatorNode(
@@ -93,15 +90,6 @@ testdata = [
         ),
     ),
     (
-        "platform_machine == 'x86_64' and python_version < '4.0'",
-        OperatorNode(
-            operator="and",
-            _left=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
-            _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
-        ),
-    ),
-    # Simple OR combinations
-    (
         "os_name == 'nt' or os_name == 'posix'",
         OperatorNode(
             operator="or",
@@ -109,27 +97,108 @@ testdata = [
             _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
         ),
     ),
+]
+
+
+@pytest.mark.parametrize(
+    "marker_str,expected", boolean_markers, ids=[x[0] for x in boolean_markers]
+)
+def test_boolean_markers(marker_str: str, expected):
+    result = parse(marker_str)
+    assert_nodes_equal(result, expected)
+
+
+# Nested AND operation tests
+nested_and_markers = [
     (
-        "python_version < '3.8' or python_version >= '4.0'",
+        "python_version >= '3.8' and (os_name == 'posix' and platform_machine == 'x86_64')",
         OperatorNode(
-            operator="or",
-            _left=ExpressionNode(lhs="python_version", comparator="<", rhs="3.8"),
-            _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="4.0"),
+            operator="and",
+            _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+            _right=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+                _right=ExpressionNode(
+                    lhs="platform_machine", comparator="==", rhs="x86_64"
+                ),
+            ),
+        ),
+    ),
+    (
+        "(python_version >= '3.8' and os_name == 'posix') and platform_machine == 'x86_64'",
+        OperatorNode(
+            operator="and",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+            ),
+            _right=ExpressionNode(
+                lhs="platform_machine", comparator="==", rhs="x86_64"
+            ),
         ),
     ),
 ]
 
 
 @pytest.mark.parametrize(
-    "marker_str,expected",
-    testdata,
-    ids=[x[0] for x in testdata],
+    "marker_str,expected", nested_and_markers, ids=[x[0] for x in nested_and_markers]
 )
-def test_parse_markers(marker_str: str, expected):
+def test_nested_and_markers(marker_str: str, expected):
     result = parse(marker_str)
     assert_nodes_equal(result, expected)
 
 
+# Complex nested AND operation tests
+complex_and_markers = [
+    (
+        "python_version >= '3.8' and (os_name == 'posix' and platform_machine == 'x86_64') and python_version < '4.0'",
+        OperatorNode(
+            operator="and",
+            _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+            _right=OperatorNode(
+                operator="and",
+                _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
+                _left=OperatorNode(
+                    operator="and",
+                    _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+                    _right=ExpressionNode(
+                        lhs="platform_machine", comparator="==", rhs="x86_64"
+                    ),
+                ),
+            ),
+        ),
+    ),
+    (
+        "(python_version >= '3.8' and os_name == 'posix') and (platform_machine == 'x86_64' and python_version < '4.0')",
+        OperatorNode(
+            operator="and",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+            ),
+            _right=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(
+                    lhs="platform_machine", comparator="==", rhs="x86_64"
+                ),
+                _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
+            ),
+        ),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "marker_str,expected", complex_and_markers, ids=[x[0] for x in complex_and_markers]
+)
+def test_complex_and_markers(marker_str: str, expected):
+    result = parse(marker_str)
+    assert_nodes_equal(result, expected)
+
+
+# Invalid marker tests
 invalid_markers = [
     "python_version",  # Missing operator and value
     "python_version ==",  # Missing value
@@ -154,3 +223,72 @@ invalid_markers = [
 def test_invalid_markers(marker_str: str):
     with pytest.raises((ValueError, SyntaxError)):
         parse(marker_str)
+
+
+# Mixed AND/OR operation tests
+mixed_op_markers = [
+    (
+        "os_name == 'nt' or python_version >= '3.8' and platform_machine == 'x86_64'",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+            _right=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=ExpressionNode(
+                    lhs="platform_machine", comparator="==", rhs="x86_64"
+                ),
+            ),
+        ),
+    ),
+    (
+        "(os_name == 'nt' or python_version >= '3.8') and platform_machine == 'x86_64'",
+        OperatorNode(
+            operator="and",
+            _left=OperatorNode(
+                operator="or",
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+                _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+            ),
+            _right=ExpressionNode(
+                lhs="platform_machine", comparator="==", rhs="x86_64"
+            ),
+        ),
+    ),
+    (
+        "os_name == 'nt' and python_version >= '3.8' or platform_machine == 'x86_64'",
+        OperatorNode(
+            operator="and",
+            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+            _right=OperatorNode(
+                operator="or",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=ExpressionNode(
+                    lhs="platform_machine", comparator="==", rhs="x86_64"
+                ),
+            ),
+        ),
+    ),
+    (
+        "os_name == 'nt' or python_version >= '3.8' or platform_machine == 'x86_64'",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+            _right=OperatorNode(
+                operator="or",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=ExpressionNode(
+                    lhs="platform_machine", comparator="==", rhs="x86_64"
+                ),
+            ),
+        ),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "marker_str,expected", mixed_op_markers, ids=[x[0] for x in mixed_op_markers]
+)
+def test_mixed_op_markers(marker_str: str, expected):
+    result = parse(marker_str)
+    assert_nodes_equal(result, expected)

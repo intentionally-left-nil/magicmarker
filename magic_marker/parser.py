@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any
 from packaging.markers import Marker
 from packaging._parser import Op, Variable, Value
 
@@ -23,18 +23,14 @@ def parse(marker_str: str) -> Node:
 
 
 def _parse_marker(marker: Any) -> Node:
-    print(marker)
+
     if isinstance(marker, tuple) or isinstance(marker, list):
         if len(marker) == 1:
+
             return _parse_marker(marker[0])
         if len(marker) == 3:
+            # Leaf node base case
             lhs, comparator, rhs = marker
-            if comparator == "and" or comparator == "or":
-                return OperatorNode(
-                    operator=comparator,
-                    _left=_parse_marker(lhs),
-                    _right=_parse_marker(rhs),
-                )
             if (
                 isinstance(lhs, Variable)
                 and isinstance(rhs, Value)
@@ -53,7 +49,12 @@ def _parse_marker(marker: Any) -> Node:
                     comparator=comparator.value,
                     rhs=rhs.value,
                 )
-
-    raise NotImplementedError(f"Unknown marker {type(marker)}: {marker}")
+        if len(marker) >= 3 and (marker[1] == "and" or marker[1] == "or"):
+            rest = _parse_marker(marker[2:])
+            return OperatorNode(
+                operator=marker[1],
+                _left=_parse_marker(marker[0]),
+                _right=rest,
+            )
 
     raise NotImplementedError(f"Unknown marker {type(marker)}: {marker}")
