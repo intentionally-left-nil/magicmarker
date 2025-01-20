@@ -83,6 +83,40 @@ testdata = [
         "python_version == '3.8'",
         ExpressionNode(lhs="python_version", comparator="==", rhs="3.8"),
     ),
+    # Simple AND combinations
+    (
+        "python_version >= '3.8' and os_name == 'posix'",
+        OperatorNode(
+            operator="and",
+            _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+            _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+        ),
+    ),
+    (
+        "platform_machine == 'x86_64' and python_version < '4.0'",
+        OperatorNode(
+            operator="and",
+            _left=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
+            _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
+        ),
+    ),
+    # Simple OR combinations
+    (
+        "os_name == 'nt' or os_name == 'posix'",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+            _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+        ),
+    ),
+    (
+        "python_version < '3.8' or python_version >= '4.0'",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode(lhs="python_version", comparator="<", rhs="3.8"),
+            _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="4.0"),
+        ),
+    ),
 ]
 
 
@@ -106,6 +140,13 @@ invalid_markers = [
     "python_version == 3.8",  # Missing quotes
     "invalid_var == '3.8'",  # Unknown environment marker
     "PYTHON_VERSION == '3.8'",  # Case sensitive
+    # Invalid boolean logic
+    "python_version >= '3.8' and",  # Incomplete AND
+    "and os_name == 'posix'",  # AND with missing left side
+    "python_version >= '3.8' or",  # Incomplete OR
+    "or os_name == 'posix'",  # OR with missing left side
+    "python_version >= '3.8' and and os_name == 'posix'",  # Double AND
+    "python_version >= '3.8' or or os_name == 'posix'",  # Double OR
 ]
 
 

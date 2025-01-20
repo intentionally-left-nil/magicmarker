@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, Literal
 from packaging.markers import Marker
 from packaging._parser import Op, Variable, Value
 
-from .node import Node, ExpressionNode
+from .node import Node, OperatorNode, ExpressionNode
 
 
 def parse(marker_str: str) -> Node:
@@ -23,19 +23,37 @@ def parse(marker_str: str) -> Node:
 
 
 def _parse_marker(marker: Any) -> Node:
-    if isinstance(marker, tuple) or isinstance(marker, list) and len(marker) == 1:
-        return _parse_item(marker)
-    raise NotImplementedError(f"Unknown marker type: {type(marker)}")
-
-
-def _parse_item(marker: list[Any] | tuple[Any, ...]) -> Node:
+    print(marker)
     if isinstance(marker, tuple) or isinstance(marker, list):
         if len(marker) == 1:
-            return _parse_item(marker[0])
+            return _parse_marker(marker[0])
         if len(marker) == 3:
             lhs, comparator, rhs = marker
-            if isinstance(lhs, Variable) and isinstance(rhs, Value):
-                return ExpressionNode(
-                    lhs=lhs.value, comparator=comparator.value, rhs=rhs.value
+            if comparator == "and" or comparator == "or":
+                return OperatorNode(
+                    operator=comparator,
+                    _left=_parse_marker(lhs),
+                    _right=_parse_marker(rhs),
                 )
-    raise NotImplementedError(f"Unknown marker type: {type(marker)}")
+            if (
+                isinstance(lhs, Variable)
+                and isinstance(rhs, Value)
+                and isinstance(comparator, Op)
+                and (
+                    comparator.value == "=="
+                    or comparator.value == "!="
+                    or comparator.value == ">"
+                    or comparator.value == "<"
+                    or comparator.value == ">="
+                    or comparator.value == "<="
+                )
+            ):
+                return ExpressionNode(
+                    lhs=lhs.value,
+                    comparator=comparator.value,
+                    rhs=rhs.value,
+                )
+
+    raise NotImplementedError(f"Unknown marker {type(marker)}: {marker}")
+
+    raise NotImplementedError(f"Unknown marker {type(marker)}: {marker}")
