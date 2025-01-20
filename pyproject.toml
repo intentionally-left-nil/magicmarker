@@ -1,0 +1,75 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "magic_marker"
+version = "0.1.0"
+description = "A library for parsing and transforming Python packaging markers"
+requires-python = ">=3.7"
+authors = [
+    { name = "Your Name", email = "your.email@example.com" },
+]
+dependencies = [
+    "typing-extensions>=4.0.0",
+    "packaging>=23.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/unknown/magic-marker#readme"
+Issues = "https://github.com/unknown/magic-marker/issues"
+Source = "https://github.com/unknown/magic-marker"
+
+[tool.hatch.version]
+path = "magic_marker/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:magic_marker tests}"
+
+[tool.coverage.run]
+source_pkgs = ["magic_marker", "tests"]
+branch = true
+parallel = true
+omit = [
+  "magic_marker/__about__.py",
+]
+
+[tool.coverage.paths]
+magic_marker = ["magic_marker", "*/magic-marker/magic_marker"]
+tests = ["tests", "*/magic-marker/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
