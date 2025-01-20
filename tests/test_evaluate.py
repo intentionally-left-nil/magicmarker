@@ -1,16 +1,11 @@
-from packaging.version import Version
-import pytest
 import re
 
-from markerpry.node import (
-    ExpressionNode,
-    BooleanNode,
-    Node,
-    OperatorNode,
-    Environment,
-)
-from markerpry.parser import parse
+import pytest
+from packaging.version import Version
 
+from markerpry.node import (BooleanNode, Environment, ExpressionNode, Node,
+                            OperatorNode)
+from markerpry.parser import parse
 
 # Basic string comparison tests
 string_testdata = [

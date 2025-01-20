@@ -1,4 +1,5 @@
-from markerpry.node import BooleanNode, ExpressionNode, OperatorNode, TRUE, FALSE
+from markerpry.node import (FALSE, TRUE, BooleanNode, ExpressionNode,
+                            OperatorNode)
 
 
 def test_boolean_node_contains():

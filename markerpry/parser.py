@@ -1,8 +1,9 @@
 from typing import Any, cast
-from packaging.markers import Marker
-from packaging._parser import Op, Variable, Value
 
-from markerpry.node import Node, OperatorNode, ExpressionNode, Comparator
+from packaging._parser import Op, Value, Variable
+from packaging.markers import Marker
+
+from markerpry.node import Comparator, ExpressionNode, Node, OperatorNode
 
 
 def parse(marker_str: str) -> Node:

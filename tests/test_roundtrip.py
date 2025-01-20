@@ -1,8 +1,8 @@
 import pytest
+from packaging.markers import Marker
 
 from markerpry.node import BooleanNode
 from markerpry.parser import parse
-from packaging.markers import Marker
 
 
 # Basic node string representation tests

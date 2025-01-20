@@ -1,8 +1,8 @@
 import pytest
-from markerpry.parser import parse
-from markerpry.node import Node, ExpressionNode, OperatorNode, BooleanNode
 from packaging.markers import Marker
 
+from markerpry.node import BooleanNode, ExpressionNode, Node, OperatorNode
+from markerpry.parser import parse
 
 # Basic comparison tests
 basic_markers = [

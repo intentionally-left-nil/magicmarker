@@ -45,6 +45,29 @@ cov = [
   "cov-report",
 ]
 
+[tool.hatch.envs.lint]
+dependencies = [
+  "pytest",
+  "pytest-cov>=4.1.0",
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "isort>=5.12.0"
+]
+[tool.hatch.envs.lint.scripts]
+typing = "mypy --install-types --non-interactive {args:markerpry tests}"
+style = [
+  "black --check --diff {args:.}",
+  "isort --check --diff {args:.}",
+]
+fmt = [
+  "black {args:.}",
+  "isort {args:.}",
+]
+all = [
+  "style",
+  "typing",
+]
+
 [[tool.hatch.envs.all.matrix]]
 python = ["3.9", "3.10", "3.11", "3.12"]
 

@@ -1,11 +1,11 @@
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal
-from typing_extensions import override, assert_never
-from packaging.version import Version
-from packaging.specifiers import SpecifierSet, InvalidSpecifier
-import re
 
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import Version
+from typing_extensions import assert_never, override
 
 Environment = dict[str, list[str | Version | re.Pattern[str] | bool]]
 Comparator = Literal["==", "!=", ">", "<", ">=", "<="]
