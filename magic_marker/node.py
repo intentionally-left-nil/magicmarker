@@ -26,6 +26,11 @@ class Node(ABC):
         """Partially or fully evaluates the node based on the environment"""
         pass
 
+    @abstractmethod
+    def __str__(self) -> str:
+        """Return a string representation of this node."""
+        pass
+
 
 @dataclass
 class BooleanNode(Node):
@@ -42,6 +47,10 @@ class BooleanNode(Node):
         if not isinstance(other, BooleanNode):
             return NotImplemented
         return self.state == other.state
+
+    @override
+    def __str__(self) -> str:
+        return str(self.state)
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
@@ -69,6 +78,10 @@ class ExpressionNode(Node):
             and self.comparator == other.comparator
             and self.rhs == other.rhs
         )
+
+    @override
+    def __str__(self) -> str:
+        return f'{self.lhs} {self.comparator} "{self.rhs}"'
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
@@ -144,6 +157,10 @@ class OperatorNode(Node):
             and self._left == other._left
             and self._right == other._right
         )
+
+    @override
+    def __str__(self) -> str:
+        return f"({self._left} {self.operator} {self._right})"
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
