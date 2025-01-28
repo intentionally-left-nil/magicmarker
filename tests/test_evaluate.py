@@ -38,6 +38,18 @@ string_testdata = [
         {"os_name": ["posix"]},
         ExpressionNode(lhs="os_name", comparator=">", rhs="posix"),
     ),
+    (
+        "string_in_operator",
+        ExpressionNode(lhs="os_name", comparator="in", rhs="posix"),
+        {"os_name": ["posix"]},
+        BooleanNode(True),
+    ),
+    (
+        "string_not_in_operator",
+        ExpressionNode(lhs="os_name", comparator="not in", rhs="posix"),
+        {"os_name": ["posix"]},
+        BooleanNode(False),
+    ),
 ]
 
 
@@ -82,6 +94,18 @@ version_testdata = [
         ExpressionNode(lhs="python_version", comparator="<=", rhs="3.8"),
         {"python_version": [Version("3.8")]},
         BooleanNode(True),
+    ),
+    (
+        "version_in_true",
+        ExpressionNode(lhs="python_version", comparator="in", rhs="2.7"),
+        {"python_version": [Version("2.7")]},
+        BooleanNode(True),
+    ),
+    (
+        "version_not_in_false",
+        ExpressionNode(lhs="python_version", comparator="not in", rhs="2.7"),
+        {"python_version": [Version("2.7")]},
+        BooleanNode(False),
     ),
 ]
 
