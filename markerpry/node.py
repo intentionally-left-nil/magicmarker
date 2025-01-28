@@ -8,7 +8,7 @@ from packaging.version import Version
 from typing_extensions import assert_never, override
 
 Environment = dict[str, list[str | Version | re.Pattern[str] | bool]]
-Comparator = Literal["==", "!=", ">", "<", ">=", "<="]
+Comparator = Literal["==", "!=", ">", "<", ">=", "<=", "in", "not in"]
 
 
 class Node(ABC):
