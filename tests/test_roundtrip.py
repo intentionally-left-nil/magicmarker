@@ -71,10 +71,7 @@ def test_multiple_and_to_str():
         'python_version >= "3.8" and os_name == "posix" and '
         'platform_machine == "x86_64" and implementation_name == "cpython"'
     )
-    expected = (
-        '(python_version >= "3.8" and (os_name == "posix" and ('
-        'platform_machine == "x86_64" and implementation_name == "cpython")))'
-    )
+    expected = '(((python_version >= "3.8" and os_name == "posix") and platform_machine == "x86_64") and implementation_name == "cpython")'
     expr = parse(marker_str)
     assert str(expr) == expected
 
@@ -82,7 +79,7 @@ def test_multiple_and_to_str():
 def test_multiple_or_to_str():
     # Test with multiple OR operators
     marker_str = 'os_name == "posix" or os_name == "nt" or ' 'os_name == "darwin" or os_name == "aix"'
-    expected = '(os_name == "posix" or (os_name == "nt" or (' 'os_name == "darwin" or os_name == "aix")))'
+    expected = '(((os_name == "posix" or os_name == "nt") or os_name == "darwin") or os_name == "aix")'
     expr = parse(marker_str)
     assert str(expr) == expected
 

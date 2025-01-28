@@ -56,21 +56,21 @@ def _parse_marker(marker: Any) -> Node:
                 _left=_parse_marker(marker[0]),
                 _right=_parse_marker(marker[2]),
             )
-        
+
         while len(marker) > 3 and 'and' in marker:
             operator_index = marker.index('and')
-            before = marker[:operator_index-1]
-            term = marker[operator_index-1:operator_index+2]
-            after = marker[operator_index+2:]
+            before = marker[: operator_index - 1]
+            term = marker[operator_index - 1 : operator_index + 2]
+            after = marker[operator_index + 2 :]
             marker = list(before) + [term] + list(after)
 
         while len(marker) > 3 and 'or' in marker:
             operator_index = marker.index('or')
-            before = marker[:operator_index-1]
-            term = marker[operator_index-1:operator_index+2]
-            after = marker[operator_index+2:]
+            before = marker[: operator_index - 1]
+            term = marker[operator_index - 1 : operator_index + 2]
+            after = marker[operator_index + 2 :]
             marker = list(before) + [term] + list(after)
-        
+
         if len(marker) == 3:
             return _parse_marker(marker)
 

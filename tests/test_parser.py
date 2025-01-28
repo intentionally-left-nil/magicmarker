@@ -119,16 +119,16 @@ complex_and_markers = [
         "python_version >= '3.8' and (os_name == 'posix' and platform_machine == 'x86_64') and python_version < '4.0'",
         OperatorNode(
             operator="and",
-            _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-            _right=OperatorNode(
+            _left=OperatorNode(
                 operator="and",
-                _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
-                _left=OperatorNode(
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=OperatorNode(
                     operator="and",
                     _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
                     _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
                 ),
             ),
+            _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
         ),
     ),
     (
@@ -212,25 +212,25 @@ mixed_op_markers = [
     (
         "os_name == 'nt' and python_version >= '3.8' or platform_machine == 'x86_64'",
         OperatorNode(
-            operator="and",
-            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
-            _right=OperatorNode(
-                operator="or",
-                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
+            operator="or",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+                _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
             ),
+            _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
         ),
     ),
     (
         "os_name == 'nt' or python_version >= '3.8' or platform_machine == 'x86_64'",
         OperatorNode(
             operator="or",
-            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
-            _right=OperatorNode(
+            _left=OperatorNode(
                 operator="or",
-                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+                _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
             ),
+            _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
         ),
     ),
 ]
