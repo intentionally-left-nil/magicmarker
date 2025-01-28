@@ -35,6 +35,14 @@ version_markers = [
         ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
     ),
     (
+        "python_version in '2.7'",
+        ExpressionNode(lhs="python_version", comparator="in", rhs="2.7"),
+    ),
+    (
+        "python_version not in '2.7'",
+        ExpressionNode(lhs="python_version", comparator="not in", rhs="2.7"),
+    ),
+    (
         "python_full_version < '3.9.7'",
         ExpressionNode(lhs="python_full_version", comparator="<", rhs="3.9.7"),
     ),

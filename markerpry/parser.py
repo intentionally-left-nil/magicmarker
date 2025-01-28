@@ -43,6 +43,8 @@ def _parse_marker(marker: Any) -> Node:
                     or comparator.value == "<"
                     or comparator.value == ">="
                     or comparator.value == "<="
+                    or comparator.value == "in"
+                    or comparator.value == "not in"
                 )
             ):
                 return ExpressionNode(
