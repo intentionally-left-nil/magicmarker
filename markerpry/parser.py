@@ -50,12 +50,28 @@ def _parse_marker(marker: Any) -> Node:
                     comparator=cast(Comparator, comparator.value),
                     rhs=rhs.value,
                 )
-        if len(marker) >= 3 and (marker[1] == "and" or marker[1] == "or"):
-            rest = _parse_marker(marker[2:])
+        if len(marker) == 3 and (marker[1] == "and" or marker[1] == "or"):
             return OperatorNode(
                 operator=marker[1],
                 _left=_parse_marker(marker[0]),
-                _right=rest,
+                _right=_parse_marker(marker[2]),
             )
+        
+        while len(marker) > 3 and 'and' in marker:
+            operator_index = marker.index('and')
+            before = marker[:operator_index-1]
+            term = marker[operator_index-1:operator_index+2]
+            after = marker[operator_index+2:]
+            marker = list(before) + [term] + list(after)
+
+        while len(marker) > 3 and 'or' in marker:
+            operator_index = marker.index('or')
+            before = marker[:operator_index-1]
+            term = marker[operator_index-1:operator_index+2]
+            after = marker[operator_index+2:]
+            marker = list(before) + [term] + list(after)
+        
+        if len(marker) == 3:
+            return _parse_marker(marker)
 
     raise NotImplementedError(f"Unknown marker {type(marker)}: {marker}")
