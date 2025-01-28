@@ -2,7 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-from .node import BooleanNode, ExpressionNode, Node, OperatorNode
+from .node import (
+    BooleanNode,
+    Comparator,
+    Environment,
+    ExpressionNode,
+    Node,
+    OperatorNode,
+)
 from .parser import parse
 
-__all__ = ["Node", "BooleanNode", "ExpressionNode", "OperatorNode", "parse"]
+__all__ = ["Node", "BooleanNode", "ExpressionNode", "OperatorNode", "parse", "Environment", "Comparator"]
