@@ -33,14 +33,10 @@ class Node(ABC):
     def right(self) -> "Node | None":
         return None
 
-    def contains(self, key: str) -> bool:
-        if self.left is not None:
-            if self.left.contains(key):
-                return True
-        if self.right is not None:
-            if self.right.contains(key):
-                return True
-        return False
+    @abstractmethod
+    def __contains__(self, key: str) -> bool:
+        """Return whether this node contains the given key."""
+        pass
 
 
 @dataclass(frozen=True)
@@ -56,6 +52,10 @@ class BooleanNode(Node):
     @override
     def evaluate(self, environment: Environment) -> "Node":
         return self  # No need to create new BooleanNode since they're immutable
+
+    @override
+    def __contains__(self, key: str) -> bool:
+        return False  # BooleanNode never contains any keys
 
 
 TRUE = BooleanNode(True)
@@ -75,8 +75,8 @@ class ExpressionNode(Node):
         return f'{self.lhs} {self.comparator} "{self.rhs}"'
 
     @override
-    def contains(self, key: str) -> bool:
-        return self.lhs == key
+    def __contains__(self, key: str) -> bool:
+        return self.lhs == key  # ExpressionNode contains only its lhs key
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
@@ -179,3 +179,8 @@ class OperatorNode(Node):
             return OperatorNode(self.operator, left, right)
         else:
             assert_never(self.operator)
+
+    @override
+    def __contains__(self, key: str) -> bool:
+        # OperatorNode contains keys from both children
+        return key in self._left or key in self._right
