@@ -8,7 +8,7 @@ from packaging.version import Version
 from typing_extensions import assert_never, override
 
 Environment = dict[str, list[str | Version | re.Pattern[str] | bool]]
-Comparator = Literal["==", "!=", ">", "<", ">=", "<=", "in", "not in"]
+Comparator = Literal["==", "===", "!=", ">", "<", ">=", "<=", "in", "not in", "~="]
 
 
 class Node(ABC):
@@ -90,11 +90,15 @@ class ExpressionNode(Node):
 
     @override
     def __str__(self) -> str:
-        return f'{self.lhs} {self.comparator} "{self.rhs}"'
+        return (
+            f'"{self.lhs}" {self.comparator} {self.rhs}'
+            if self.comparator in ('in', 'not in')
+            else f'{self.lhs} {self.comparator} "{self.rhs}"'
+        )
 
     @override
     def __contains__(self, key: str) -> bool:
-        return self.lhs == key  # ExpressionNode contains only its lhs key
+        return self.rhs == key if self.comparator in ('in', 'not in') else self.lhs == key
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
@@ -120,7 +124,7 @@ class ExpressionNode(Node):
         return self if result is None else BooleanNode(result)
 
     def _evaluate_string(self, value: str) -> "bool | None":
-        if self.comparator == "==":
+        if self.comparator == "==" or self.comparator == "===":
             return value == self.rhs
         elif self.comparator == "!=":
             return value != self.rhs
@@ -132,7 +136,7 @@ class ExpressionNode(Node):
             return None
 
     def _evaluate_pattern(self, value: re.Pattern[str]) -> "bool | None":
-        if self.comparator == "==":
+        if self.comparator == "==" or self.comparator == "===":
             return value.match(self.rhs) is not None
         elif self.comparator == "!=":
             return not value.match(self.rhs)

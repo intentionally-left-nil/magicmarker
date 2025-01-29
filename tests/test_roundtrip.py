@@ -112,3 +112,41 @@ def test_simplify():
     node = parse(marker_str)
     simplified = node.evaluate({"implementation_name": ["pypy"]})
     assert str(Marker(str(simplified))).replace('"', "'") == 'os_name == "posix"'.replace('"', "'")
+
+# In/NotIn operator roundtrip tests
+in_operator_roundtrip_testdata = [
+    (
+        "in_version",
+        '"3.7" in python_version',
+        "python_version",
+    ),
+    (
+        "in_platform",
+        '"linux" in sys_platform',
+        "sys_platform",
+    ),
+    (
+        "not_in_version",
+        '"3.7" not in python_version',
+        "python_version",
+    ),
+    (
+        "not_in_platform",
+        '"linux" not in sys_platform',
+        "sys_platform",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,marker_str,expected_key",
+    in_operator_roundtrip_testdata,
+    ids=[x[0] for x in in_operator_roundtrip_testdata],
+)
+def test_in_operator_roundtrip(name: str, marker_str: str, expected_key: str):
+    """Test that 'in' and 'not in' expressions can be parsed and formatted correctly."""
+    node = parse(marker_str)
+    # Test string roundtrip
+    assert str(node) == marker_str
+    # Test dependency key is preserved
+    assert expected_key in node
