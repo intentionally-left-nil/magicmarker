@@ -56,6 +56,7 @@ def _parse_marker(marker: Any) -> Node:
                 and isinstance(comparator, Op)
                 and (
                     comparator.value == "=="
+                    or comparator.value == "==="
                     or comparator.value == "!="
                     or comparator.value == ">"
                     or comparator.value == "<"
@@ -63,7 +64,19 @@ def _parse_marker(marker: Any) -> Node:
                     or comparator.value == "<="
                     or comparator.value == "in"
                     or comparator.value == "not in"
+                    or comparator.value == "~="
                 )
+            ):
+                return ExpressionNode(
+                    lhs=lhs.value,
+                    comparator=cast(Comparator, comparator.value),
+                    rhs=rhs.value,
+                )
+            if (
+                isinstance(lhs, Value)
+                and isinstance(rhs, Variable)
+                and isinstance(comparator, Op)
+                and (comparator.value == "in" or comparator.value == "not in")
             ):
                 return ExpressionNode(
                     lhs=lhs.value,

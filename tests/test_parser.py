@@ -354,3 +354,38 @@ def test_operator_precedence(name: str, marker_str: str, expected: Node):
     """Test that operator precedence and associativity rules are correctly applied."""
     result = parse(marker_str)
     assert result == expected
+
+
+# Real-world marker string tests
+real_world_markers = [
+    (
+        "tilde_match_version",
+        'python_version ~= "3.7"',
+    ),
+    (
+        "triple_equal_version",
+        'python_version === "3.7"',
+    ),
+    ('in syntax', '"windows" in sys_platform'),
+]
+
+
+@pytest.mark.parametrize(
+    "name,marker_str",
+    real_world_markers,
+    ids=[x[0] for x in real_world_markers],
+)
+def test_real_world_markers_roundtrip(name: str, marker_str: str):
+    """Test that real-world marker strings can be parsed and converted back to strings."""
+    from packaging.markers import Marker
+
+    # Verify the marker is valid according to packaging
+    Marker(marker_str)
+
+    # Parse and convert back to string
+    tree = parse(marker_str)
+    result_str = str(tree)
+
+    # Parse the result string again to verify it produces the same tree
+    result_tree = parse(result_str)
+    assert result_tree == tree

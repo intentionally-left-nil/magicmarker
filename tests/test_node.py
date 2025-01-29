@@ -130,3 +130,180 @@ def test_non_boolean_node_coercion():
     with pytest.raises(TypeError, match="Cannot convert OperatorNode to bool"):
         if op:
             pass
+
+
+# In/NotIn operator tests
+in_operator_testdata = [
+    (
+        "in_check_rhs",
+        ExpressionNode(lhs="value", comparator="in", rhs="python_version"),
+        "python_version",
+        True,  # Should check rhs
+    ),
+    (
+        "in_check_lhs",
+        ExpressionNode(lhs="value", comparator="in", rhs="python_version"),
+        "value",
+        False,  # lhs is not a dependency
+    ),
+    (
+        "in_check_other",
+        ExpressionNode(lhs="value", comparator="in", rhs="python_version"),
+        "other_key",
+        False,  # other keys not included
+    ),
+    (
+        "not_in_check_rhs",
+        ExpressionNode(lhs="value", comparator="not in", rhs="python_version"),
+        "python_version",
+        True,  # Should check rhs
+    ),
+    (
+        "not_in_check_lhs",
+        ExpressionNode(lhs="value", comparator="not in", rhs="python_version"),
+        "value",
+        False,  # lhs is not a dependency
+    ),
+    (
+        "not_in_check_other",
+        ExpressionNode(lhs="value", comparator="not in", rhs="python_version"),
+        "other_key",
+        False,  # other keys not included
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,expr,key,expected",
+    in_operator_testdata,
+    ids=[x[0] for x in in_operator_testdata],
+)
+def test_in_operator_contains(name: str, expr: ExpressionNode, key: str, expected: bool):
+    """Test that 'in' and 'not in' expressions check the correct keys."""
+    assert (key in expr) == expected
+
+
+# String representation tests for in/not in
+in_str_testdata = [
+    (
+        "in_version",
+        ExpressionNode(lhs="3.7", comparator="in", rhs="python_version"),
+        '"3.7" in python_version',
+    ),
+    (
+        "in_platform",
+        ExpressionNode(lhs="linux", comparator="in", rhs="sys_platform"),
+        '"linux" in sys_platform',
+    ),
+    (
+        "not_in_version",
+        ExpressionNode(lhs="3.7", comparator="not in", rhs="python_version"),
+        '"3.7" not in python_version',
+    ),
+    (
+        "not_in_platform",
+        ExpressionNode(lhs="linux", comparator="not in", rhs="sys_platform"),
+        '"linux" not in sys_platform',
+    ),
+    (
+        "triple_equal_version",
+        ExpressionNode(lhs="python_version", comparator="===", rhs="3.7"),
+        'python_version === "3.7"',
+    ),
+    (
+        "triple_equal_platform",
+        ExpressionNode(lhs="sys_platform", comparator="===", rhs="linux"),
+        'sys_platform === "linux"',
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,expr,expected_str",
+    in_str_testdata,
+    ids=[x[0] for x in in_str_testdata],
+)
+def test_in_operator_str(name: str, expr: ExpressionNode, expected_str: str):
+    """Test string representation of 'in' and 'not in' expressions."""
+    assert str(expr) == expected_str
+
+
+# Expression node contains tests
+expression_contains_testdata = [
+    (
+        "normal_comparison_lhs",
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+        "python_version",
+        True,  # lhs is the key for normal comparisons
+    ),
+    (
+        "normal_comparison_rhs",
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+        "3.7",
+        False,  # rhs is not a key for normal comparisons
+    ),
+    (
+        "in_operator_lhs",
+        ExpressionNode(lhs="3.7", comparator="in", rhs="python_version"),
+        "3.7",
+        False,  # lhs is not a key for 'in' operator
+    ),
+    (
+        "in_operator_rhs",
+        ExpressionNode(lhs="3.7", comparator="in", rhs="python_version"),
+        "python_version",
+        True,  # rhs is the key for 'in' operator
+    ),
+    (
+        "not_in_operator_lhs",
+        ExpressionNode(lhs="3.7", comparator="not in", rhs="python_version"),
+        "3.7",
+        False,  # lhs is not a key for 'not in' operator
+    ),
+    (
+        "not_in_operator_rhs",
+        ExpressionNode(lhs="3.7", comparator="not in", rhs="python_version"),
+        "python_version",
+        True,  # rhs is the key for 'not in' operator
+    ),
+    (
+        "normal_comparison_other",
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+        "other_key",
+        False,  # unrelated keys are never contained
+    ),
+    (
+        "in_operator_other",
+        ExpressionNode(lhs="3.7", comparator="in", rhs="python_version"),
+        "other_key",
+        False,  # unrelated keys are never contained
+    ),
+    (
+        "triple_equal_lhs",
+        ExpressionNode(lhs="python_version", comparator="===", rhs="3.7"),
+        "python_version",
+        True,  # lhs is the key for triple equal comparison
+    ),
+    (
+        "triple_equal_rhs",
+        ExpressionNode(lhs="python_version", comparator="===", rhs="3.7"),
+        "3.7",
+        False,  # rhs is not a key for triple equal comparison
+    ),
+    (
+        "triple_equal_other",
+        ExpressionNode(lhs="python_version", comparator="===", rhs="3.7"),
+        "other_key",
+        False,  # unrelated keys are never contained
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,expr,key,expected",
+    expression_contains_testdata,
+    ids=[x[0] for x in expression_contains_testdata],
+)
+def test_expression_contains(name: str, expr: ExpressionNode, key: str, expected: bool):
+    """Test that __contains__ works correctly for all expression types."""
+    assert (key in expr) == expected
