@@ -8,7 +8,7 @@ from packaging.version import Version
 from typing_extensions import assert_never, override
 
 Environment = dict[str, list[str | Version | re.Pattern[str] | bool]]
-Comparator = Literal["==", "!=", ">", "<", ">=", "<="]
+Comparator = Literal["==", "!=", ">", "<", ">=", "<=", "in", "not in"]
 
 
 class Node(ABC):
@@ -106,6 +106,10 @@ class ExpressionNode(Node):
             return value == self.rhs
         elif self.comparator == "!=":
             return value != self.rhs
+        elif self.comparator == "in":
+            return value in self.rhs
+        elif self.comparator == "not in":
+            return value not in self.rhs
         else:
             return None
 
@@ -118,6 +122,11 @@ class ExpressionNode(Node):
             return None
 
     def _evaluate_version(self, value: Version) -> "bool | None":
+        if self.comparator in ("in", "not in"):
+            # From: https://peps.python.org/pep-0508/#environment-markers
+            # The <marker_op> operators that are not in <version_cmp> perform
+            # the same as they do for strings in Python
+            return self._evaluate_string(str(value))
         try:
             specifier = SpecifierSet(f"{self.comparator} {self.rhs}")
         except InvalidSpecifier:
