@@ -33,14 +33,17 @@ class Node(ABC):
     def right(self) -> "Node | None":
         return None
 
-    def contains(self, key: str) -> bool:
-        if self.left is not None:
-            if self.left.contains(key):
-                return True
-        if self.right is not None:
-            if self.right.contains(key):
-                return True
-        return False
+    @abstractmethod
+    def __contains__(self, key: str) -> bool:
+        """Return whether this node contains the given key."""
+        pass
+
+    def __bool__(self) -> bool:
+        """
+        Prevent accidental boolean coercion of non-boolean nodes.
+        Only BooleanNode should be used in boolean contexts.
+        """
+        raise TypeError(f"Cannot convert {self.__class__.__name__} to bool - use evaluate() first")
 
 
 @dataclass(frozen=True)
@@ -56,6 +59,21 @@ class BooleanNode(Node):
     @override
     def evaluate(self, environment: Environment) -> "Node":
         return self  # No need to create new BooleanNode since they're immutable
+
+    @override
+    def __contains__(self, key: str) -> bool:
+        return False  # BooleanNode never contains any keys
+
+    def __bool__(self) -> bool:
+        return self.state
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BooleanNode):
+            return self.state == other.state
+        if isinstance(other, bool):
+            return bool(self) == other
+        return NotImplemented
 
 
 TRUE = BooleanNode(True)
@@ -75,8 +93,8 @@ class ExpressionNode(Node):
         return f'{self.lhs} {self.comparator} "{self.rhs}"'
 
     @override
-    def contains(self, key: str) -> bool:
-        return self.lhs == key
+    def __contains__(self, key: str) -> bool:
+        return self.lhs == key  # ExpressionNode contains only its lhs key
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
@@ -179,3 +197,8 @@ class OperatorNode(Node):
             return OperatorNode(self.operator, left, right)
         else:
             assert_never(self.operator)
+
+    @override
+    def __contains__(self, key: str) -> bool:
+        # OperatorNode contains keys from both children
+        return key in self._left or key in self._right

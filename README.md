@@ -44,7 +44,8 @@ The parse method returns a tree where each node is one of:
 
 ### Tree Navigation
 
-The tree can be navigated using the `left` and `right` properties of nodes:
+The tree can be navigated using the `left` and `right` properties of nodes. These properties
+return `None` for leaf nodes (BooleanNode and ExpressionNode):
 
 ```python
 # For operator nodes (and/or), access child nodes
@@ -54,6 +55,23 @@ right_expr = tree.right # (os_name == "posix" or platform_system == "Linux")
 # For nested expressions, continue traversing
 nested_left = right_expr.left  # os_name == "posix"
 nested_right = right_expr.right  # platform_system == "Linux"
+
+# Leaf nodes have no children
+assert nested_left.left is None
+assert nested_left.right is None
+```
+
+### Checking for Keys
+
+You can check if a marker expression contains a specific environment key using the `in` operator:
+
+```python
+# Check if a marker depends on specific environment keys
+tree = parse('python_version >= "3.7" and os_name == "posix"')
+
+assert "python_version" in tree
+assert "os_name" in tree
+assert "platform_machine" not in tree
 ```
 
 ### String Representation
