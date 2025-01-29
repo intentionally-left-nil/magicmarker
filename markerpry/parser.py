@@ -75,8 +75,6 @@ def _parse_marker(marker: Any) -> Node:
                     or comparator.value == "<"
                     or comparator.value == ">="
                     or comparator.value == "<="
-                    or comparator.value == "in"
-                    or comparator.value == "not in"
                     or comparator.value == "~="
                 )
             ):
@@ -84,6 +82,40 @@ def _parse_marker(marker: Any) -> Node:
                     lhs=lhs.value,
                     comparator=cast(Comparator, comparator.value),
                     rhs=rhs.value,
+                )
+            if (
+                isinstance(lhs, Value)
+                and isinstance(rhs, Variable)
+                and isinstance(comparator, Op)
+                and (
+                    comparator.value == "=="
+                    or comparator.value == "==="
+                    or comparator.value == "!="
+                    or comparator.value == ">"
+                    or comparator.value == "<"
+                    or comparator.value == ">="
+                    or comparator.value == "<="
+                    or comparator.value == "~="
+                )
+            ):
+                # The marker has e.g. "3.0" < python_version
+                # Which is equivalent to python_version >= "3.0"
+                # Switch it here so we don't deal with this edge case after parsing
+                reverse_map: dict[Comparator, Comparator] = {
+                    "==": "==",
+                    "===": "===",
+                    "!=": "!=",
+                    ">": "<=",
+                    "<": ">=",
+                    ">=": "<",
+                    "<=": ">",
+                    "~=": "~=",
+                }
+                reverse_comparator = reverse_map[cast(Comparator, comparator.value)]
+                return ExpressionNode(
+                    lhs=rhs.value,
+                    comparator=reverse_comparator,
+                    rhs=lhs.value,
                 )
             if (
                 isinstance(lhs, Value)

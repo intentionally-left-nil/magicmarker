@@ -35,14 +35,6 @@ version_markers = [
         ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
     ),
     (
-        "python_version in '2.7'",
-        ExpressionNode(lhs="python_version", comparator="in", rhs="2.7"),
-    ),
-    (
-        "python_version not in '2.7'",
-        ExpressionNode(lhs="python_version", comparator="not in", rhs="2.7"),
-    ),
-    (
         "python_full_version < '3.9.7'",
         ExpressionNode(lhs="python_full_version", comparator="<", rhs="3.9.7"),
     ),
@@ -366,7 +358,8 @@ real_world_markers = [
         "triple_equal_version",
         'python_version === "3.7"',
     ),
-    ('in syntax', '"windows" in sys_platform'),
+    ('in_syntax', '"windows" in sys_platform'),
+    ('lhs_rhs_reversed', 'python_version < "2.7" or ("3.0" <= python_version and python_version < "3.2")'),
 ]
 
 
@@ -395,3 +388,61 @@ def test_parse_marker():
     marker = Marker("os_name == 'nt'")
     result = parse_marker(marker)
     assert result == ExpressionNode(lhs="os_name", comparator="==", rhs="nt")
+
+
+# Reversed comparator tests
+reversed_comparator_testdata = [
+    (
+        "reversed_greater_than",
+        '"3.0" < python_version',
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.0"),
+    ),
+    (
+        "reversed_less_than",
+        '"3.0" > python_version',
+        ExpressionNode(lhs="python_version", comparator="<=", rhs="3.0"),
+    ),
+    (
+        "reversed_greater_equal",
+        '"3.0" <= python_version',
+        ExpressionNode(lhs="python_version", comparator=">", rhs="3.0"),
+    ),
+    (
+        "reversed_less_equal",
+        '"3.0" >= python_version',
+        ExpressionNode(lhs="python_version", comparator="<", rhs="3.0"),
+    ),
+    (
+        "reversed_equal",
+        '"3.0" == python_version',
+        ExpressionNode(lhs="python_version", comparator="==", rhs="3.0"),
+    ),
+    (
+        "reversed_not_equal",
+        '"3.0" != python_version',
+        ExpressionNode(lhs="python_version", comparator="!=", rhs="3.0"),
+    ),
+    (
+        "reversed_triple_equal",
+        '"3.0" === python_version',
+        ExpressionNode(lhs="python_version", comparator="===", rhs="3.0"),
+    ),
+    (
+        "reversed_tilde_equal",
+        '"3.0" ~= python_version',
+        ExpressionNode(lhs="python_version", comparator="~=", rhs="3.0"),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,marker_str,expected",
+    reversed_comparator_testdata,
+    ids=[x[0] for x in reversed_comparator_testdata],
+)
+def test_reversed_comparators(name: str, marker_str: str, expected: Node):
+    """Test that reversed comparators (e.g. '3.0' <= python_version) are normalized correctly."""
+    result = parse(marker_str)
+    assert result == expected
+    # Also verify the string representation is normalized
+    assert str(result) == f'{expected.lhs} {expected.comparator} "{expected.rhs}"'
