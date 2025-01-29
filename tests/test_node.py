@@ -1,4 +1,5 @@
 from markerpry.node import FALSE, TRUE, BooleanNode, ExpressionNode, OperatorNode
+import pytest
 
 
 def test_boolean_node_contains():
@@ -58,7 +59,58 @@ def test_operator_node_with_boolean_contains():
 
 
 def test_boolean_equality():
+    """Test boolean node equality with both BooleanNodes and Python bools."""
     assert BooleanNode(True) == BooleanNode(True)
     assert BooleanNode(True) != BooleanNode(False)
     assert TRUE == TRUE
     assert BooleanNode(True) == TRUE
+    # New tests for bool comparison
+    assert TRUE == True  # type: ignore
+    assert FALSE == False  # type: ignore
+    assert TRUE != False  # type: ignore
+    assert FALSE != True  # type: ignore
+
+
+def test_boolean_coercion():
+    """Test that BooleanNode can be used in boolean contexts."""
+    assert bool(TRUE) is True
+    assert bool(FALSE) is False
+    # Test in if statement
+    if TRUE:
+        assert True
+    else:
+        assert False
+    if FALSE:
+        assert False
+    else:
+        assert True
+    # Test with and/or
+    assert TRUE and True
+    assert not (FALSE and True)
+    assert TRUE or False
+    assert not (FALSE or False)
+
+
+def test_non_boolean_node_coercion():
+    """Test that non-boolean nodes cannot be coerced to bool."""
+    expr = ExpressionNode("python_version", ">=", "3.7")
+    op = OperatorNode(
+        "and",
+        ExpressionNode("os_name", "==", "posix"),
+        ExpressionNode("python_version", ">=", "3.7"),
+    )
+
+    with pytest.raises(TypeError, match="Cannot convert ExpressionNode to bool"):
+        bool(expr)
+    
+    with pytest.raises(TypeError, match="Cannot convert OperatorNode to bool"):
+        bool(op)
+    
+    # Test in if statement
+    with pytest.raises(TypeError, match="Cannot convert ExpressionNode to bool"):
+        if expr:
+            pass
+    
+    with pytest.raises(TypeError, match="Cannot convert OperatorNode to bool"):
+        if op:
+            pass

@@ -38,6 +38,13 @@ class Node(ABC):
         """Return whether this node contains the given key."""
         pass
 
+    def __bool__(self) -> bool:
+        """
+        Prevent accidental boolean coercion of non-boolean nodes.
+        Only BooleanNode should be used in boolean contexts.
+        """
+        raise TypeError(f"Cannot convert {self.__class__.__name__} to bool - use evaluate() first")
+
 
 @dataclass(frozen=True)
 class BooleanNode(Node):
@@ -56,6 +63,17 @@ class BooleanNode(Node):
     @override
     def __contains__(self, key: str) -> bool:
         return False  # BooleanNode never contains any keys
+
+    def __bool__(self) -> bool:
+        return self.state
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BooleanNode):
+            return self.state == other.state
+        if isinstance(other, bool):
+            return bool(self) == other
+        return NotImplemented
 
 
 TRUE = BooleanNode(True)
