@@ -12,7 +12,7 @@ from .node import (
     Node,
     OperatorNode,
 )
-from .parser import parse
+from .parser import parse, parse_marker
 
 __all__ = [
     "Node",
@@ -20,6 +20,7 @@ __all__ = [
     "ExpressionNode",
     "OperatorNode",
     "parse",
+    "parse_marker",
     "Environment",
     "Comparator",
     "TRUE",

@@ -20,6 +20,19 @@ def parse(marker_str: str) -> Node:
         packaging.markers.InvalidMarker: If the marker string is invalid
     """
     marker = Marker(marker_str)
+    return parse_marker(marker)
+
+
+def parse_marker(marker: Marker) -> Node:
+    """
+    Parse a packaging.marker.Marker object into a Node tree.
+
+    Args:
+        marker: A packaging.marker.Marker instance.
+
+    Returns:
+        A Node representing the parsed marker expression
+    """
     return _parse_marker(marker._markers)
 
 

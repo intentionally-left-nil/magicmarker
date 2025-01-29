@@ -2,7 +2,7 @@ import pytest
 from packaging.markers import Marker
 
 from markerpry.node import BooleanNode, ExpressionNode, Node, OperatorNode
-from markerpry.parser import parse
+from markerpry.parser import parse, parse_marker
 
 # Basic comparison tests
 basic_markers = [
@@ -389,3 +389,9 @@ def test_real_world_markers_roundtrip(name: str, marker_str: str):
     # Parse the result string again to verify it produces the same tree
     result_tree = parse(result_str)
     assert result_tree == tree
+
+
+def test_parse_marker():
+    marker = Marker("os_name == 'nt'")
+    result = parse_marker(marker)
+    assert result == ExpressionNode(lhs="os_name", comparator="==", rhs="nt")
