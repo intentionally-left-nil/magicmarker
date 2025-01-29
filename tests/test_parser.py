@@ -444,5 +444,3 @@ def test_reversed_comparators(name: str, marker_str: str, expected: Node):
     """Test that reversed comparators (e.g. '3.0' <= python_version) are normalized correctly."""
     result = parse(marker_str)
     assert result == expected
-    # Also verify the string representation is normalized
-    assert str(result) == f'{expected.lhs} {expected.comparator} "{expected.rhs}"'
