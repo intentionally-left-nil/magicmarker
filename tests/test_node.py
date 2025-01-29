@@ -292,4 +292,3 @@ expression_contains_testdata = [
 def test_expression_contains(name: str, expr: ExpressionNode, key: str, expected: bool):
     """Test that __contains__ works correctly for all expression types."""
     assert (key in expr) == expected
-

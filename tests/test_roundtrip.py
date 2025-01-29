@@ -113,6 +113,7 @@ def test_simplify():
     simplified = node.evaluate({"implementation_name": ["pypy"]})
     assert str(Marker(str(simplified))).replace('"', "'") == 'os_name == "posix"'.replace('"', "'")
 
+
 # In/NotIn operator roundtrip tests
 in_operator_roundtrip_testdata = [
     (
