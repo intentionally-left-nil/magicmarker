@@ -119,16 +119,16 @@ complex_and_markers = [
         "python_version >= '3.8' and (os_name == 'posix' and platform_machine == 'x86_64') and python_version < '4.0'",
         OperatorNode(
             operator="and",
-            _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-            _right=OperatorNode(
+            _left=OperatorNode(
                 operator="and",
-                _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
-                _left=OperatorNode(
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
+                _right=OperatorNode(
                     operator="and",
                     _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
                     _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
                 ),
             ),
+            _right=ExpressionNode(lhs="python_version", comparator="<", rhs="4.0"),
         ),
     ),
     (
@@ -212,25 +212,25 @@ mixed_op_markers = [
     (
         "os_name == 'nt' and python_version >= '3.8' or platform_machine == 'x86_64'",
         OperatorNode(
-            operator="and",
-            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
-            _right=OperatorNode(
-                operator="or",
-                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
+            operator="or",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+                _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
             ),
+            _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
         ),
     ),
     (
         "os_name == 'nt' or python_version >= '3.8' or platform_machine == 'x86_64'",
         OperatorNode(
             operator="or",
-            _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
-            _right=OperatorNode(
+            _left=OperatorNode(
                 operator="or",
-                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
-                _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+                _right=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.8"),
             ),
+            _right=ExpressionNode(lhs="platform_machine", comparator="==", rhs="x86_64"),
         ),
     ),
 ]
@@ -238,5 +238,111 @@ mixed_op_markers = [
 
 @pytest.mark.parametrize("marker_str,expected", mixed_op_markers, ids=[x[0] for x in mixed_op_markers])
 def test_mixed_op_markers(marker_str: str, expected):
+    result = parse(marker_str)
+    assert result == expected
+
+
+# Operator precedence and associativity tests
+precedence_testdata = [
+    (
+        "left_associative_and",
+        "python_version >= '3.7' and os_name == 'posix' and implementation_name == 'cpython'",
+        OperatorNode(
+            operator="and",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+                _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+            ),
+            _right=ExpressionNode(lhs="implementation_name", comparator="==", rhs="cpython"),
+        ),
+    ),
+    (
+        "left_associative_or",
+        "python_version >= '3.7' or os_name == 'posix' or implementation_name == 'cpython'",
+        OperatorNode(
+            operator="or",
+            _left=OperatorNode(
+                operator="or",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+                _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+            ),
+            _right=ExpressionNode(lhs="implementation_name", comparator="==", rhs="cpython"),
+        ),
+    ),
+    (
+        "and_higher_precedence_than_or",
+        "python_version >= '3.7' or os_name == 'posix' and implementation_name == 'cpython'",
+        OperatorNode(
+            operator="or",
+            _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+            _right=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+                _right=ExpressionNode(lhs="implementation_name", comparator="==", rhs="cpython"),
+            ),
+        ),
+    ),
+    (
+        "and_higher_precedence_multiple",
+        "python_version >= '3.7' or os_name == 'posix' and implementation_name == 'cpython' or sys_platform == 'linux'",
+        OperatorNode(
+            operator="or",
+            _left=OperatorNode(
+                operator="or",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+                _right=OperatorNode(
+                    operator="and",
+                    _left=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+                    _right=ExpressionNode(lhs="implementation_name", comparator="==", rhs="cpython"),
+                ),
+            ),
+            _right=ExpressionNode(lhs="sys_platform", comparator="==", rhs="linux"),
+        ),
+    ),
+    (
+        "mixed_precedence_complex",
+        "python_version >= '3.7' and os_name == 'posix' or implementation_name == 'cpython' and sys_platform == 'linux'",
+        OperatorNode(
+            operator="or",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+                _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+            ),
+            _right=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="implementation_name", comparator="==", rhs="cpython"),
+                _right=ExpressionNode(lhs="sys_platform", comparator="==", rhs="linux"),
+            ),
+        ),
+    ),
+    (
+        "explicit_precedence_matches_implicit",
+        "(python_version >= '3.7' and os_name == 'posix') or (implementation_name == 'cpython' and sys_platform == 'linux')",
+        OperatorNode(
+            operator="or",
+            _left=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+                _right=ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+            ),
+            _right=OperatorNode(
+                operator="and",
+                _left=ExpressionNode(lhs="implementation_name", comparator="==", rhs="cpython"),
+                _right=ExpressionNode(lhs="sys_platform", comparator="==", rhs="linux"),
+            ),
+        ),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,marker_str,expected",
+    precedence_testdata,
+    ids=[x[0] for x in precedence_testdata],
+)
+def test_operator_precedence(name: str, marker_str: str, expected: Node):
+    """Test that operator precedence and associativity rules are correctly applied."""
     result = parse(marker_str)
     assert result == expected
