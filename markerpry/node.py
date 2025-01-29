@@ -33,6 +33,10 @@ class Node(ABC):
     def right(self) -> "Node | None":
         return None
 
+    @property
+    def resolved(self) -> bool:
+        return False
+
     @abstractmethod
     def __contains__(self, key: str) -> bool:
         """Return whether this node contains the given key."""
@@ -66,6 +70,11 @@ class BooleanNode(Node):
 
     def __bool__(self) -> bool:
         return self.state
+
+    @override
+    @property
+    def resolved(self) -> bool:
+        return True
 
     @override
     def __eq__(self, other: object) -> bool:
