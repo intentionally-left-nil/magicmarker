@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 from .node import (
+    FALSE,
+    TRUE,
     BooleanNode,
     Comparator,
     Environment,
@@ -12,4 +14,14 @@ from .node import (
 )
 from .parser import parse
 
-__all__ = ["Node", "BooleanNode", "ExpressionNode", "OperatorNode", "parse", "Environment", "Comparator"]
+__all__ = [
+    "Node",
+    "BooleanNode",
+    "ExpressionNode",
+    "OperatorNode",
+    "parse",
+    "Environment",
+    "Comparator",
+    "TRUE",
+    "FALSE",
+]
