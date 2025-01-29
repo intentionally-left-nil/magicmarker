@@ -63,6 +63,39 @@ def test_string_evaluate(name: str, expr: ExpressionNode, env: Environment, expe
     assert result == expected
 
 
+# Resolved attribute tests
+resolved_testdata = [
+    (
+        "string_equality_true",
+        ExpressionNode(lhs="os_name", comparator="==", rhs="posix"),
+        {"os_name": ["posix"]},
+        True,
+    ),
+    (
+        "string_equality_false",
+        ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+        {"os_name": ["posix"]},
+        True,
+    ),
+    (
+        "string_equality_incomplete",
+        ExpressionNode(lhs="os_name", comparator="==", rhs="nt"),
+        {"python_version": [Version("3.7")]},
+        False,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,expr,env,expected",
+    resolved_testdata,
+    ids=[x[0] for x in resolved_testdata],
+)
+def test_resolved_attribute_on_evaluate(name: str, expr: ExpressionNode, env: Environment, expected: bool):
+    result = expr.evaluate(env)
+    assert result.resolved == expected
+
+
 # Version comparison tests
 version_testdata = [
     (

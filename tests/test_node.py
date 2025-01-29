@@ -92,6 +92,21 @@ def test_boolean_coercion():
     assert not (FALSE or False)
 
 
+def test_resolved_attribute():
+    """Test that the resolved attribute is True iff a node is a BooleanNode"""
+    assert BooleanNode(True).resolved == True
+    assert BooleanNode(False).resolved == True
+    ExpressionNode("python_version", ">=", "3.7").resolved == False
+    assert (
+        OperatorNode(
+            "and",
+            ExpressionNode("os_name", "==", "posix"),
+            ExpressionNode("python_version", ">=", "3.7"),
+        ).resolved
+        == False
+    )
+
+
 def test_non_boolean_node_coercion():
     """Test that non-boolean nodes cannot be coerced to bool."""
     expr = ExpressionNode("python_version", ">=", "3.7")
