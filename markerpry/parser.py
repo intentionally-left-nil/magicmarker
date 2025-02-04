@@ -79,8 +79,8 @@ def _parse_marker(marker: Any) -> Node:
                     _right=_parse_marker(rhs),
                 )
             if (
-                isinstance(lhs, Variable)
-                and isinstance(rhs, Value)
+                isinstance(lhs, (Variable, Value))
+                and isinstance(rhs, (Variable, Value))
                 and isinstance(comparator, Op)
                 and (
                     comparator.value == "=="
@@ -91,46 +91,29 @@ def _parse_marker(marker: Any) -> Node:
                     or comparator.value == ">="
                     or comparator.value == "<="
                     or comparator.value == "~="
+                    or comparator.value == "in"
+                    or comparator.value == "not in"
                 )
             ):
+                if comparator.value in ('in', 'not in'):
+                    return ExpressionNode(
+                        lhs=lhs.value,
+                        comparator=cast(Comparator, comparator.value),
+                        rhs=rhs.value,
+                        inverted=isinstance(lhs, Variable),
+                    )
+                if isinstance(lhs, Value):
+                    # The marker is reversed, e.g. "3.0" < python_version
+                    # Flip it around to simplify the logic
+                    return ExpressionNode(
+                        lhs=rhs.value,
+                        comparator=REVERSE_MAP[cast(Comparator, comparator.value)],
+                        rhs=lhs.value,
+                    )
                 return ExpressionNode(
                     lhs=lhs.value,
                     comparator=cast(Comparator, comparator.value),
                     rhs=rhs.value,
                 )
-            if (
-                isinstance(lhs, Value)
-                and isinstance(rhs, Variable)
-                and isinstance(comparator, Op)
-                and (
-                    comparator.value == "=="
-                    or comparator.value == "==="
-                    or comparator.value == "!="
-                    or comparator.value == ">"
-                    or comparator.value == "<"
-                    or comparator.value == ">="
-                    or comparator.value == "<="
-                    or comparator.value == "~="
-                )
-            ):
-                # The marker has e.g. "3.0" < python_version
-                # Which is equivalent to python_version > "3.0"
-                # Switch it here so we don't deal with this edge case after parsing
-                reverse_comparator = REVERSE_MAP[cast(Comparator, comparator.value)]
-                return ExpressionNode(
-                    lhs=rhs.value,
-                    comparator=reverse_comparator,
-                    rhs=lhs.value,
-                )
-            if (
-                isinstance(lhs, Value)
-                and isinstance(rhs, Variable)
-                and isinstance(comparator, Op)
-                and (comparator.value == "in" or comparator.value == "not in")
-            ):
-                return ExpressionNode(
-                    lhs=lhs.value,
-                    comparator=cast(Comparator, comparator.value),
-                    rhs=rhs.value,
-                )
+
     raise NotImplementedError(f"Unknown marker {type(marker)}: {marker}")
