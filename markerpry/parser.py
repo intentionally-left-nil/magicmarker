@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from types import MappingProxyType
-from typing import Any
+from typing import Any, cast
 
 from packaging._parser import Op, Value, Variable
 from packaging.markers import Marker
@@ -97,19 +97,22 @@ def _parse_marker(marker: Any) -> Node:
             ):
                 if comparator.value in ('in', 'not in'):
                     return ExpressionNode(
-                        lhs=lhs.value, comparator=comparator.value, rhs=rhs.value, inverted=isinstance(lhs, Variable)
+                        lhs=lhs.value,
+                        comparator=cast(Comparator, comparator.value),
+                        rhs=rhs.value,
+                        inverted=isinstance(lhs, Variable),
                     )
                 if isinstance(lhs, Value):
                     # The marker is reversed, e.g. "3.0" < python_version
                     # Flip it around to simplify the logic
                     return ExpressionNode(
                         lhs=rhs.value,
-                        comparator=REVERSE_MAP[comparator.value],
+                        comparator=REVERSE_MAP[cast(Comparator, comparator.value)],
                         rhs=lhs.value,
                     )
                 return ExpressionNode(
                     lhs=lhs.value,
-                    comparator=comparator.value,
+                    comparator=cast(Comparator, comparator.value),
                     rhs=rhs.value,
                 )
 
