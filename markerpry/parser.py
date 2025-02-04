@@ -1,9 +1,24 @@
+from collections.abc import Mapping
+from types import MappingProxyType
 from typing import Any, cast
 
 from packaging._parser import Op, Value, Variable
 from packaging.markers import Marker
 
 from markerpry.node import Comparator, ExpressionNode, Node, OperatorNode
+
+REVERSE_MAP: Mapping[Comparator, Comparator] = MappingProxyType(
+    {
+        "==": "==",
+        "===": "===",
+        "!=": "!=",
+        ">": "<",
+        "<": ">",
+        ">=": "<=",
+        "<=": ">=",
+        "~=": "~=",
+    }
+)
 
 
 def parse(marker_str: str) -> Node:
@@ -99,19 +114,9 @@ def _parse_marker(marker: Any) -> Node:
                 )
             ):
                 # The marker has e.g. "3.0" < python_version
-                # Which is equivalent to python_version >= "3.0"
+                # Which is equivalent to python_version > "3.0"
                 # Switch it here so we don't deal with this edge case after parsing
-                reverse_map: dict[Comparator, Comparator] = {
-                    "==": "==",
-                    "===": "===",
-                    "!=": "!=",
-                    ">": "<=",
-                    "<": ">=",
-                    ">=": "<",
-                    "<=": ">",
-                    "~=": "~=",
-                }
-                reverse_comparator = reverse_map[cast(Comparator, comparator.value)]
+                reverse_comparator = REVERSE_MAP[cast(Comparator, comparator.value)]
                 return ExpressionNode(
                     lhs=rhs.value,
                     comparator=reverse_comparator,

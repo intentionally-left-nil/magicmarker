@@ -395,22 +395,22 @@ reversed_comparator_testdata = [
     (
         "reversed_greater_than",
         '"3.0" < python_version',
-        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.0"),
+        ExpressionNode(lhs="python_version", comparator=">", rhs="3.0"),
     ),
     (
         "reversed_less_than",
         '"3.0" > python_version',
-        ExpressionNode(lhs="python_version", comparator="<=", rhs="3.0"),
+        ExpressionNode(lhs="python_version", comparator="<", rhs="3.0"),
     ),
     (
         "reversed_greater_equal",
         '"3.0" <= python_version',
-        ExpressionNode(lhs="python_version", comparator=">", rhs="3.0"),
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.0"),
     ),
     (
         "reversed_less_equal",
         '"3.0" >= python_version',
-        ExpressionNode(lhs="python_version", comparator="<", rhs="3.0"),
+        ExpressionNode(lhs="python_version", comparator="<=", rhs="3.0"),
     ),
     (
         "reversed_equal",
