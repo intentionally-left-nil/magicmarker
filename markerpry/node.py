@@ -71,8 +71,8 @@ class BooleanNode(Node):
     def __bool__(self) -> bool:
         return self.state
 
-    @override
     @property
+    @override
     def resolved(self) -> bool:
         return True
 
@@ -96,24 +96,31 @@ class ExpressionNode(Node):
     lhs: str
     comparator: Comparator
     rhs: str
+    inverted: bool = False
 
     @override
     def __str__(self) -> str:
-        return (
-            f'"{self.lhs}" {self.comparator} {self.rhs}'
-            if self.comparator in ('in', 'not in')
-            else f'{self.lhs} {self.comparator} "{self.rhs}"'
-        )
+        rhs_is_value = not self.inverted
+        if self.comparator in ('in', 'not in'):
+            rhs_is_value = not rhs_is_value
+
+        lhs = str(self.lhs)
+        rhs = str(self.rhs)
+        if rhs_is_value:
+            rhs = f'"{rhs}"'
+        else:
+            lhs = f'"{lhs}"'
+        return f'{lhs} {self.comparator} {rhs}'
 
     @override
     def __contains__(self, key: str) -> bool:
-        return self.rhs == key if self.comparator in ('in', 'not in') else self.lhs == key
+        return self._key() == key
 
     @override
     def evaluate(self, environment: Environment) -> "Node":
-        if not self.lhs in environment:
+        if not self._key() in environment:
             return self
-        values = environment[self.lhs]
+        values = environment[self._key()]
         result: bool | None = None
         for value in values:
             if isinstance(value, str):
@@ -134,21 +141,21 @@ class ExpressionNode(Node):
 
     def _evaluate_string(self, value: str) -> "bool | None":
         if self.comparator == "==" or self.comparator == "===":
-            return value == self.rhs
+            return value == self._value()
         elif self.comparator == "!=":
-            return value != self.rhs
+            return value != self._value()
         elif self.comparator == "in":
-            return value in self.rhs
+            return value in self._value() if self.inverted else self._value() in value
         elif self.comparator == "not in":
-            return value not in self.rhs
+            return value not in self._value() if self.inverted else self._value() not in value
         else:
             return None
 
     def _evaluate_pattern(self, value: re.Pattern[str]) -> "bool | None":
         if self.comparator == "==" or self.comparator == "===":
-            return value.match(self.rhs) is not None
+            return value.match(self._value()) is not None
         elif self.comparator == "!=":
-            return not value.match(self.rhs)
+            return not value.match(self._value())
         else:
             return None
 
@@ -159,10 +166,20 @@ class ExpressionNode(Node):
             # the same as they do for strings in Python
             return self._evaluate_string(str(value))
         try:
-            specifier = SpecifierSet(f"{self.comparator} {self.rhs}")
+            specifier = SpecifierSet(f"{self.comparator} {self._value()}")
         except InvalidSpecifier:
             return None
         return specifier.contains(value)
+
+    def _key(self) -> str:
+        if self.comparator in ('in', 'not in'):
+            return self.lhs if self.inverted else self.rhs
+        return self.rhs if self.inverted else self.lhs
+
+    def _value(self) -> str:
+        if self.comparator in ('in', 'not in'):
+            return self.rhs if self.inverted else self.lhs
+        return self.lhs if self.inverted else self.rhs
 
 
 @dataclass(frozen=True)

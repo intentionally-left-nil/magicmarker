@@ -359,6 +359,7 @@ real_world_markers = [
         'python_version === "3.7"',
     ),
     ('in_syntax', '"windows" in sys_platform'),
+    ('in_syntax_reversed', 'python_version in "2.7"'),
     ('lhs_rhs_reversed', 'python_version < "2.7" or ("3.0" <= python_version and python_version < "3.2")'),
 ]
 
@@ -444,3 +445,53 @@ def test_reversed_comparators(name: str, marker_str: str, expected: Node):
     """Test that reversed comparators (e.g. '3.0' <= python_version) are normalized correctly."""
     result = parse(marker_str)
     assert result == expected
+
+
+# Tests for operand ordering and variable/value combinations
+operand_order_markers = [
+    (
+        "normal_comparison",
+        'python_version >= "3.7"',
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+    ),
+    (
+        "reversed_comparison",
+        '"3.7" <= python_version',
+        ExpressionNode(lhs="python_version", comparator=">=", rhs="3.7"),
+    ),
+    (
+        "normal_in",
+        '"win32" in sys_platform',
+        ExpressionNode(lhs="win32", comparator="in", rhs="sys_platform"),
+    ),
+    (
+        "reversed_in",
+        'sys_platform in "win32"',
+        ExpressionNode(lhs="sys_platform", comparator="in", rhs="win32", inverted=True),
+    ),
+    (
+        "normal_not_in",
+        '"win32" not in sys_platform',
+        ExpressionNode(lhs="win32", comparator="not in", rhs="sys_platform"),
+    ),
+    (
+        "reversed_not_in",
+        'sys_platform not in "win32"',
+        ExpressionNode(lhs="sys_platform", comparator="not in", rhs="win32", inverted=True),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,marker_str,expected",
+    operand_order_markers,
+    ids=[x[0] for x in operand_order_markers],
+)
+def test_operand_ordering(name: str, marker_str: str, expected: Node | None):
+    """Test that operand ordering is handled correctly for different operators."""
+    result = parse(marker_str)
+    assert result == expected
+    # Also verify that the string representation can be parsed back
+    result_str = str(result)
+    result_tree = parse(result_str)
+    assert result_tree == result
